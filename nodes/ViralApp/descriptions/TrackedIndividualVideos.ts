@@ -21,6 +21,27 @@ export const trackedIndividualVideosOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/videos/tracked',
+						qs: {
+							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
+							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
+						},
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+							{
+								type: 'setKeyValue',
+								properties: {
+									pageCount: '={{$response.body.pageCount}}',
+									totalRows: '={{$response.body.totalRows}}',
+								},
+							},
+						],
 					},
 				},
 			},
@@ -130,14 +151,32 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 			{
 				displayName: 'Projects',
 				name: 'projects',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of project IDs',
+				type: 'resourceLocator',
+				default: { mode: 'list', value: [] },
+				modes: [
+					{
+						displayName: 'From List',
+						name: 'list',
+						type: 'list',
+						placeholder: 'Select projects...',
+						typeOptions: {
+							searchListMethod: 'projectSearch',
+							searchable: true,
+						},
+					},
+					{
+						displayName: 'By IDs',
+						name: 'id',
+						type: 'string',
+						placeholder: 'Enter project IDs (comma-separated)',
+					},
+				],
+				description: 'Filter by projects',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'projects',
-						value: '={{$value.split(",").map(p => p.trim())}}',
+						value: '={{typeof $value === "string" ? $value.split(",").map(p => p.trim()) : $value}}',
 					},
 				},
 			},
@@ -273,23 +312,45 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 	//   trackedIndividualVideos: refresh
 	// ----------------------------------------
 	{
-		displayName: 'Video IDs',
+		displayName: 'Videos',
 		name: 'videoIds',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: [] },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['trackedIndividualVideos'],
 				operation: ['refresh'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'Comma-separated list of video IDs to refresh',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select videos...',
+				typeOptions: {
+					searchListMethod: 'videoSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By IDs',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter video IDs (comma-separated)',
+			},
+		],
+		description: 'Videos to refresh',
+		extractValue: {
+			type: 'regex',
+			regex: '^[a-zA-Z0-9-_,]+$',
+		},
 		routing: {
 			send: {
 				type: 'body',
 				property: 'videoIds',
-				value: '={{$value.split(",").map(id => id.trim())}}',
+				value: '={{typeof $value === "string" ? $value.split(",").map(id => id.trim()) : $value}}',
 			},
 		},
 	},

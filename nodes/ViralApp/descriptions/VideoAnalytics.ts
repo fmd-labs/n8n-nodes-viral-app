@@ -21,6 +21,27 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/videos',
+						qs: {
+							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
+							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
+						},
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+							{
+								type: 'setKeyValue',
+								properties: {
+									pageCount: '={{$response.body.pageCount}}',
+									totalRows: '={{$response.body.totalRows}}',
+								},
+							},
+						],
 					},
 				},
 			},
@@ -110,18 +131,40 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		description: 'Social media platform',
 	},
 	{
-		displayName: 'Platform Video ID',
+		displayName: 'Video',
 		name: 'platformVideoId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
 				operation: ['get', 'getHistory'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'Platform-specific video ID',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a video...',
+				typeOptions: {
+					searchListMethod: 'videoSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter platform-specific video ID',
+			},
+		],
+		description: 'The video to get analytics for',
+		extractValue: {
+			type: 'regex',
+			regex: '^[a-zA-Z0-9-_]+$',
+		},
 	},
 
 	// ----------------------------------------

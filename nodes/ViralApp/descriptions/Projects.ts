@@ -17,72 +17,36 @@ export const projectsOperations: INodeProperties[] = [
 				value: 'getAll',
 				description: 'List many projects',
 				action: 'List all projects',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/projects',
-					},
-				},
 			},
 			{
 				name: 'Create',
 				value: 'create',
 				description: 'Create a new project',
 				action: 'Create a project',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/projects',
-					},
-				},
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				description: 'Update an existing project',
 				action: 'Update a project',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/projects/{{$parameter.projectId}}',
-					},
-				},
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete a project',
 				action: 'Delete a project',
-				routing: {
-					request: {
-						method: 'DELETE',
-						url: '=/projects/{{$parameter.projectId}}',
-					},
-				},
 			},
 			{
 				name: 'Add Account',
 				value: 'addAccount',
 				description: 'Add an account to a project',
 				action: 'Add account to project',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '=/projects/{{$parameter.projectId}}/accounts/{{$parameter.accountId}}',
-					},
-				},
 			},
 			{
 				name: 'Remove Account',
 				value: 'removeAccount',
 				description: 'Remove an account from a project',
 				action: 'Remove account from project',
-				routing: {
-					request: {
-						method: 'DELETE',
-						url: '=/projects/{{$parameter.projectId}}/accounts/{{$parameter.accountId}}',
-					},
-				},
 			},
 		],
 		default: 'getAll',
@@ -90,6 +54,40 @@ export const projectsOperations: INodeProperties[] = [
 ];
 
 export const projectsFields: INodeProperties[] = [
+	// ----------------------------------------
+	//        projects: getAll
+	// ----------------------------------------
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['projects'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				resource: ['projects'],
+				operation: ['getAll'],
+				returnAll: [false],
+			},
+		},
+		typeOptions: {
+			minValue: 1,
+		},
+		default: 50,
+		description: 'Max number of results to return',
+	},
+
 	// ----------------------------------------
 	//        projects: create
 	// ----------------------------------------
@@ -106,12 +104,6 @@ export const projectsFields: INodeProperties[] = [
 		default: '',
 		required: true,
 		description: 'Project name',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'name',
-			},
-		},
 	},
 	{
 		displayName: 'Additional Fields',
@@ -132,12 +124,6 @@ export const projectsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Project description',
-				routing: {
-					send: {
-						type: 'body',
-						property: 'description',
-					},
-				},
 			},
 			{
 				displayName: 'Logo URL',
@@ -145,12 +131,6 @@ export const projectsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'URL to project logo',
-				routing: {
-					send: {
-						type: 'body',
-						property: 'logo',
-					},
-				},
 			},
 		],
 	},
@@ -159,18 +139,45 @@ export const projectsFields: INodeProperties[] = [
 	//        projects: update
 	// ----------------------------------------
 	{
-		displayName: 'Project ID',
+		displayName: 'Project',
 		name: 'projectId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['projects'],
 				operation: ['update', 'delete', 'addAccount', 'removeAccount'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'ID of the project',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a project...',
+				typeOptions: {
+					searchListMethod: 'projectSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter project ID',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^[a-zA-Z0-9-_]+$',
+							errorMessage: 'Not a valid project ID',
+						},
+					},
+				],
+			},
+		],
+		description: 'The project to operate on',
 	},
 	{
 		displayName: 'Update Fields',
@@ -204,12 +211,6 @@ export const projectsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Project description',
-				routing: {
-					send: {
-						type: 'body',
-						property: 'description',
-					},
-				},
 			},
 			{
 				displayName: 'Logo URL',
@@ -217,12 +218,6 @@ export const projectsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'URL to project logo',
-				routing: {
-					send: {
-						type: 'body',
-						property: 'logo',
-					},
-				},
 			},
 		],
 	},
@@ -231,17 +226,44 @@ export const projectsFields: INodeProperties[] = [
 	//   projects: addAccount, removeAccount
 	// ----------------------------------------
 	{
-		displayName: 'Account ID',
+		displayName: 'Account',
 		name: 'accountId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['projects'],
 				operation: ['addAccount', 'removeAccount'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'ID of the account',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select an account...',
+				typeOptions: {
+					searchListMethod: 'trackedAccountSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter account ID',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^[a-zA-Z0-9-_]+$',
+							errorMessage: 'Not a valid account ID',
+						},
+					},
+				],
+			},
+		],
+		description: 'The tracked account to add/remove',
 	},
 ];

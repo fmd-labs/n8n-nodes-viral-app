@@ -21,6 +21,27 @@ export const accountAnalyticsOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/accounts',
+						qs: {
+							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
+							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
+						},
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+							{
+								type: 'setKeyValue',
+								properties: {
+									pageCount: '={{$response.body.pageCount}}',
+									totalRows: '={{$response.body.totalRows}}',
+								},
+							},
+						],
 					},
 				},
 			},
@@ -361,60 +382,4 @@ export const accountAnalyticsFields: INodeProperties[] = [
 		},
 	},
 
-	// ----------------------------------------
-	//        Pagination (for getAll)
-	// ----------------------------------------
-	{
-		displayName: 'Page',
-		name: 'page',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['accountAnalytics'],
-				operation: ['getAll'],
-				returnAll: [false],
-			},
-			hide: {
-				limit: [0],
-			},
-		},
-		typeOptions: {
-			minValue: 1,
-		},
-		default: 1,
-		description: 'Page number to retrieve',
-		routing: {
-			send: {
-				type: 'query',
-				property: 'page',
-			},
-		},
-	},
-	{
-		displayName: 'Items Per Page',
-		name: 'perPage',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['accountAnalytics'],
-				operation: ['getAll'],
-				returnAll: [false],
-			},
-			hide: {
-				limit: [0],
-			},
-		},
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		default: 10,
-		routing: {
-			send: {
-				type: 'query',
-				property: 'perPage',
-				value: '={{$parameter.limit}}',
-			},
-		},
-	},
 ];

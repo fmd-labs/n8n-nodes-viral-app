@@ -21,6 +21,27 @@ export const trackedAccountsOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/accounts/tracked',
+						qs: {
+							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
+							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
+						},
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+							{
+								type: 'setKeyValue',
+								properties: {
+									pageCount: '={{$response.body.pageCount}}',
+									totalRows: '={{$response.body.totalRows}}',
+								},
+							},
+						],
 					},
 				},
 			},
@@ -191,14 +212,32 @@ export const trackedAccountsFields: INodeProperties[] = [
 			{
 				displayName: 'Projects',
 				name: 'projects',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of project IDs',
+				type: 'resourceLocator',
+				default: { mode: 'list', value: [] },
+				modes: [
+					{
+						displayName: 'From List',
+						name: 'list',
+						type: 'list',
+						placeholder: 'Select projects...',
+						typeOptions: {
+							searchListMethod: 'projectSearch',
+							searchable: true,
+						},
+					},
+					{
+						displayName: 'By IDs',
+						name: 'id',
+						type: 'string',
+						placeholder: 'Enter project IDs (comma-separated)',
+					},
+				],
+				description: 'Filter by projects',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'projects',
-						value: '={{$value.split(",").map(p => p.trim())}}',
+						value: '={{typeof $value === "string" ? $value.split(",").map(p => p.trim()) : $value}}',
 					},
 				},
 			},
@@ -312,12 +351,39 @@ export const trackedAccountsFields: INodeProperties[] = [
 					},
 					{
 						displayName: 'Max Videos',
-						name: 'maxVideos',
-						type: 'number',
+						name: 'max_videos',
+						type: 'options',
+						options: [
+							{
+								name: '0 (Disable tracking)',
+								value: 0,
+							},
+							{
+								name: '10',
+								value: 10,
+							},
+							{
+								name: '30',
+								value: 30,
+							},
+							{
+								name: '100',
+								value: 100,
+							},
+							{
+								name: '300',
+								value: 300,
+							},
+							{
+								name: '1000',
+								value: 1000,
+							},
+							{
+								name: '2000',
+								value: 2000,
+							},
+						],
 						default: 100,
-						typeOptions: {
-							minValue: 1,
-						},
 						description: 'Maximum number of videos to track',
 					},
 					{
@@ -330,37 +396,45 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 			},
 		],
-		routing: {
-			send: {
-				type: 'body',
-				property: 'accounts',
-				value: '={{$value.account}}',
-			},
-		},
 	},
 
 	// ----------------------------------------
 	//        trackedAccounts: refresh
 	// ----------------------------------------
 	{
-		displayName: 'Account IDs',
+		displayName: 'Accounts',
 		name: 'accountIds',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: [] },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['trackedAccounts'],
 				operation: ['refresh'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'Comma-separated list of account IDs to refresh',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'accountIds',
-				value: '={{$value.split(",").map(id => id.trim())}}',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select accounts...',
+				typeOptions: {
+					searchListMethod: 'trackedAccountSearch',
+					searchable: true,
+				},
 			},
+			{
+				displayName: 'By IDs',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter account IDs (comma-separated)',
+			},
+		],
+		description: 'Accounts to refresh',
+		extractValue: {
+			type: 'regex',
+			regex: '^[a-zA-Z0-9-_,]+$',
 		},
 	},
 
@@ -368,39 +442,97 @@ export const trackedAccountsFields: INodeProperties[] = [
 	//    trackedAccounts: updateMaxVideos
 	// ----------------------------------------
 	{
-		displayName: 'Account ID',
+		displayName: 'Account',
 		name: 'accountId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['trackedAccounts'],
 				operation: ['updateMaxVideos', 'updateHashtags', 'updateProjectHashtags'],
 			},
 		},
-		default: '',
-		required: true,
-		description: 'ID of the tracked account',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select an account...',
+				typeOptions: {
+					searchListMethod: 'trackedAccountSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter account ID',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^[a-zA-Z0-9-_]+$',
+							errorMessage: 'Not a valid account ID',
+						},
+					},
+				],
+			},
+		],
+		description: 'The tracked account to operate on',
+		extractValue: {
+			type: 'regex',
+			regex: '^[a-zA-Z0-9-_]+$',
+		},
 	},
 	{
 		displayName: 'Max Videos',
 		name: 'maxVideos',
-		type: 'number',
+		type: 'options',
 		displayOptions: {
 			show: {
 				resource: ['trackedAccounts'],
 				operation: ['updateMaxVideos'],
 			},
 		},
+		options: [
+			{
+				name: '0 (Disable tracking)',
+				value: 0,
+			},
+			{
+				name: '10',
+				value: 10,
+			},
+			{
+				name: '30',
+				value: 30,
+			},
+			{
+				name: '100',
+				value: 100,
+			},
+			{
+				name: '300',
+				value: 300,
+			},
+			{
+				name: '1000',
+				value: 1000,
+			},
+			{
+				name: '2000',
+				value: 2000,
+			},
+		],
 		default: 100,
 		required: true,
-		typeOptions: {
-			minValue: 1,
-		},
 		description: 'Maximum number of videos to track',
 		routing: {
 			send: {
 				type: 'body',
-				property: 'maxVideos',
+				property: 'newMaxVideos',
 			},
 		},
 	},
@@ -420,36 +552,51 @@ export const trackedAccountsFields: INodeProperties[] = [
 		},
 		default: '',
 		description: 'Comma-separated list of hashtags to filter content',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'hashtags',
-				value: '={{$value.split(",").map(h => h.trim())}}',
-			},
-		},
 	},
 
 	// ----------------------------------------
 	// trackedAccounts: updateProjectHashtags
 	// ----------------------------------------
 	{
-		displayName: 'Project ID',
+		displayName: 'Project',
 		name: 'projectId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['trackedAccounts'],
 				operation: ['updateProjectHashtags'],
 			},
 		},
-		default: '',
-		required: true,
-		routing: {
-			send: {
-				type: 'body',
-				property: 'projectId',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a project...',
+				typeOptions: {
+					searchListMethod: 'projectSearch',
+					searchable: true,
+				},
 			},
-		},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter project ID',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^[a-zA-Z0-9-_]+$',
+							errorMessage: 'Not a valid project ID',
+						},
+					},
+				],
+			},
+		],
+		description: 'The project to update hashtags for',
 	},
 	{
 		displayName: 'Hashtags',
@@ -463,69 +610,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 		},
 		default: '',
 		description: 'Comma-separated list of hashtags for the project',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'hashtags',
-				value: '={{$value.split(",").map(h => h.trim())}}',
-			},
-		},
 	},
 
-	// ----------------------------------------
-	//        Pagination (for getAll)
-	// ----------------------------------------
-	{
-		displayName: 'Page',
-		name: 'page',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['trackedAccounts'],
-				operation: ['getAll'],
-				returnAll: [false],
-			},
-			hide: {
-				limit: [0],
-			},
-		},
-		typeOptions: {
-			minValue: 1,
-		},
-		default: 1,
-		description: 'Page number to retrieve',
-		routing: {
-			send: {
-				type: 'query',
-				property: 'page',
-			},
-		},
-	},
-	{
-		displayName: 'Items Per Page',
-		name: 'perPage',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['trackedAccounts'],
-				operation: ['getAll'],
-				returnAll: [false],
-			},
-			hide: {
-				limit: [0],
-			},
-		},
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		default: 10,
-		routing: {
-			send: {
-				type: 'query',
-				property: 'perPage',
-				value: '={{$parameter.limit}}',
-			},
-		},
-	},
 ];

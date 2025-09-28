@@ -1,4 +1,15 @@
-import { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import {
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	IDataObject,
+	ILoadOptionsFunctions,
+	INodeListSearchResult,
+} from 'n8n-workflow';
+
+import { viralAppApiRequest, viralAppApiRequestAllItems } from './GenericFunctions';
+
 import { trackedAccountsOperations, trackedAccountsFields } from './descriptions/TrackedAccounts';
 import { trackedIndividualVideosOperations, trackedIndividualVideosFields } from './descriptions/TrackedIndividualVideos';
 import { accountAnalyticsOperations, accountAnalyticsFields } from './descriptions/AccountAnalytics';
@@ -27,13 +38,6 @@ export class ViralApp implements INodeType {
 				required: true,
 			},
 		],
-		requestDefaults: {
-			baseURL: 'https://viral.app/api/v1',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-		},
 		properties: [
 			{
 				displayName: 'Resource',
@@ -109,4 +113,503 @@ export class ViralApp implements INodeType {
 			...integrationsFields,
 		],
 	};
+
+	methods = {
+		listSearch: {
+			async projectSearch(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+				paginationToken?: string,
+			): Promise<INodeListSearchResult> {
+				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+				const perPage = 20; // Reasonable page size for search
+				
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
+				
+				// Add search filter if provided
+				if (filter) {
+					query.name = filter;
+				}
+				
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/projects',
+					{},
+					query,
+				);
+				
+				return {
+					results: response.data.map((project: IDataObject) => ({
+						name: project.name as string,
+						value: project.id as string,
+						// Optional: add description if available
+						// description: project.description as string,
+					})),
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
+			
+			async trackedAccountSearch(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+				paginationToken?: string,
+			): Promise<INodeListSearchResult> {
+				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+				const perPage = 20; // Reasonable page size for search
+				
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
+				
+				// Add username filter if provided
+				if (filter) {
+					query.username = filter;
+				}
+				
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/accounts/tracked',
+					{},
+					query,
+				);
+				
+				// Map platform values to display names
+				const platformDisplay: { [key: string]: string } = {
+					tiktok: 'TikTok',
+					instagram: 'Instagram',
+					youtube: 'YouTube',
+				};
+				
+				return {
+					results: response.data.map((account: IDataObject) => ({
+						name: `${account.username} (${platformDisplay[account.platform as string] || account.platform})`,
+						value: account.id as string,
+					})),
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
+
+			async videoSearch(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+				paginationToken?: string,
+			): Promise<INodeListSearchResult> {
+				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+				const perPage = 20;
+				
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
+				
+				if (filter) {
+					query.search = filter;
+				}
+				
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/videos',
+					{},
+					query,
+				);
+				
+				const platformDisplay: { [key: string]: string } = {
+					tiktok: 'TikTok',
+					instagram: 'Instagram',
+					youtube: 'YouTube',
+				};
+				
+				return {
+					results: response.data.map((video: IDataObject) => ({
+						name: `${video.title || video.description || 'Untitled'} (${platformDisplay[video.platform as string] || video.platform})`,
+						value: video.id as string,
+					})),
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
+		},
+	};
+
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const items = this.getInputData();
+		const returnData: INodeExecutionData[] = [];
+		const length = items.length;
+		
+		for (let i = 0; i < length; i++) {
+			try {
+				const resource = this.getNodeParameter('resource', i) as string;
+				const operation = this.getNodeParameter('operation', i) as string;
+				let responseData;
+
+				// ACCOUNT ANALYTICS
+				if (resource === 'accountAnalytics') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/accounts', {}, filters
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page since we removed manual page field
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/accounts', {}, 
+								{ ...filters, page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					} else if (operation === 'export') {
+						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/accounts/export', exportBody
+						);
+					}
+				}
+				
+				// TRACKED ACCOUNTS
+				else if (resource === 'trackedAccounts') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/accounts/tracked', {}, filters
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/accounts/tracked', {}, 
+								{ ...filters, page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					} else if (operation === 'add') {
+						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
+						// Extract the account array from the fixedCollection structure
+						const accounts = accountsData.account as IDataObject[];
+						
+						// Process hashtags if they exist (convert comma-separated string to array)
+						const processedAccounts = accounts.map(acc => {
+							const account: IDataObject = {
+								platform: acc.platform,
+								username: acc.username,
+								max_videos: acc.max_videos
+							};
+							
+							// Handle hashtags filter if provided
+							if (acc.hashtagsFilter && typeof acc.hashtagsFilter === 'string') {
+								const hashtagsStr = acc.hashtagsFilter as string;
+								if (hashtagsStr.trim()) {
+									account.hashtagsFilter = hashtagsStr.split(',').map(h => h.trim()).filter(h => h);
+								}
+							}
+							
+							return account;
+						});
+						
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/accounts/tracked', { accounts: processedAccounts }
+						);
+					} else if (operation === 'getCount') {
+						const count = await viralAppApiRequest.call(
+							this, 'GET', '/accounts/tracked/count'
+						);
+						// Wrap the count number in an object for n8n
+						responseData = { count };
+					} else if (operation === 'refresh') {
+						const accountIdsParam = this.getNodeParameter('accountIds', i, undefined, { extractValue: true });
+						// Handle both array and comma-separated string inputs
+						const accountIds = Array.isArray(accountIdsParam) 
+							? accountIdsParam 
+							: typeof accountIdsParam === 'string' 
+								? accountIdsParam.split(',').map(id => id.trim()).filter(id => id)
+								: [];
+						
+						// First, get account details to retrieve platform info for each account
+						const accounts = await viralAppApiRequestAllItems.call(
+							this, 'GET', '/accounts/tracked'
+						);
+						
+						// Create a map of account ID to platform and platformAccountId
+						const accountMap = new Map();
+						accounts.forEach((account: any) => {
+							accountMap.set(account.id, {
+								platform: account.platform,
+								platformAccountId: account.platformAccountId
+							});
+						});
+						
+						// Build the items array with platform and platformAccountId info
+						const items = accountIds.map(accountId => {
+							const accountInfo = accountMap.get(accountId);
+							if (!accountInfo) {
+								throw new Error(`Account not found for ID: ${accountId}`);
+							}
+							return {
+								platform: accountInfo.platform,
+								id: accountInfo.platformAccountId
+							};
+						});
+						
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/accounts/tracked/refresh', { items }
+						);
+					} else if (operation === 'updateMaxVideos') {
+						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
+						const maxVideos = this.getNodeParameter('maxVideos', i) as number;
+						responseData = await viralAppApiRequest.call(
+							this, 'PUT', `/accounts/tracked/${accountId}/max-videos`, { newMaxVideos: maxVideos }
+						);
+					} else if (operation === 'updateHashtags') {
+						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
+						const hashtagsInput = this.getNodeParameter('hashtags', i) as string;
+						// Convert comma-separated string to array and trim whitespace
+						const hashtags = hashtagsInput ? hashtagsInput.split(',').map(h => h.trim()).filter(h => h) : [];
+						responseData = await viralAppApiRequest.call(
+							this, 'PUT', `/accounts/tracked/${accountId}/hashtags`, { hashtagsFilter: hashtags }
+						);
+					} else if (operation === 'updateProjectHashtags') {
+						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
+						const projectId = this.getNodeParameter('projectId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						const hashtagsInput = this.getNodeParameter('projectHashtags', i) as string;
+						// Convert comma-separated string to array and trim whitespace
+						const hashtags = hashtagsInput ? hashtagsInput.split(',').map(h => h.trim()).filter(h => h) : [];
+						responseData = await viralAppApiRequest.call(
+							this, 'PUT', `/accounts/tracked/${accountId}/project-hashtags`, 
+							{ 
+								projectHashtags: [{
+									projectId,
+									hashtagsFilter: hashtags
+								}]
+							}
+						);
+					}
+				}
+				
+				// VIDEO ANALYTICS
+				else if (resource === 'videoAnalytics') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/videos', {}, filters
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/videos', {}, 
+								{ ...filters, page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					} else if (operation === 'get') {
+						const platform = this.getNodeParameter('platform', i) as string;
+						const platformVideoId = this.getNodeParameter('platformVideoId', i, undefined, { extractValue: true }) as string;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', `/videos/${platform}/${platformVideoId}`
+						);
+					} else if (operation === 'getHistory') {
+						const platform = this.getNodeParameter('platform', i) as string;
+						const platformVideoId = this.getNodeParameter('platformVideoId', i, undefined, { extractValue: true }) as string;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', `/videos/${platform}/${platformVideoId}/history`
+						);
+					} else if (operation === 'getActivity') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', '/videos/activity', {}, filters
+						);
+					} else if (operation === 'export') {
+						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/videos/export', exportBody
+						);
+					}
+				}
+				
+				// TRACKED INDIVIDUAL VIDEOS
+				else if (resource === 'trackedIndividualVideos') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/videos/tracked', {}, filters
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/videos/tracked', {}, 
+								{ ...filters, page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					} else if (operation === 'add') {
+						const videos = this.getNodeParameter('videos', i) as IDataObject[];
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/videos/tracked', { videos }
+						);
+					} else if (operation === 'refresh') {
+						// TODO: API expects 'items' array with {platform, id} objects  
+						// Current implementation only has video IDs, would need platform info
+						const videoIds = this.getNodeParameter('videoIds', i, undefined, { extractValue: true }) as string[];
+						
+						// For now, keeping the existing structure - this may need API adjustment
+						// or fetching video details first to get platform info
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/videos/tracked/refresh', { videoIds }
+						);
+					}
+				}
+				
+				// PROJECTS
+				else if (resource === 'projects') {
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/projects'
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page  
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/projects', {}, 
+								{ page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					} else if (operation === 'create') {
+						const name = this.getNodeParameter('name', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/projects', { name, ...additionalFields }
+						);
+					} else if (operation === 'update') {
+						const projectId = this.getNodeParameter('projectId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'PUT', `/projects/${projectId}`, updateFields
+						);
+					} else if (operation === 'delete') {
+						const projectId = this.getNodeParameter('projectId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						responseData = await viralAppApiRequest.call(
+							this, 'DELETE', `/projects/${projectId}`
+						);
+					} else if (operation === 'addAccount') {
+						const projectId = this.getNodeParameter('projectId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						const accountId = this.getNodeParameter('accountId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', `/projects/${projectId}/accounts/${accountId}`
+						);
+					} else if (operation === 'removeAccount') {
+						const projectId = this.getNodeParameter('projectId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						const accountId = this.getNodeParameter('accountId', i, undefined, {
+							extractValue: true,
+						}) as string;
+						responseData = await viralAppApiRequest.call(
+							this, 'DELETE', `/projects/${projectId}/accounts/${accountId}`
+						);
+					}
+				}
+				
+				// INTEGRATIONS
+				else if (resource === 'integrations') {
+					if (operation === 'getApps') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						
+						if (returnAll) {
+							responseData = await viralAppApiRequestAllItems.call(
+								this, 'GET', '/apps'
+							);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							const page = 1; // Default page
+							const response = await viralAppApiRequest.call(
+								this, 'GET', '/apps', {}, 
+								{ page, perPage: limit }
+							);
+							responseData = response.data;
+						}
+					}
+				}
+				
+				// GENERAL ANALYTICS
+				else if (resource === 'generalAnalytics') {
+					if (operation === 'getTopVideos') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', '/analytics/top-videos', {}, filters
+						);
+					} else if (operation === 'getTopAccounts') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', '/analytics/top-accounts', {}, filters
+						);
+					} else if (operation === 'getKpis') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', '/analytics/kpis', {}, filters
+						);
+					} else if (operation === 'getInteractionMetrics') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'GET', '/analytics/interaction-metrics', {}, filters
+						);
+					}
+				}
+				
+				// Format response data for n8n
+				if (Array.isArray(responseData)) {
+					returnData.push(...responseData.map((item: IDataObject) => ({ json: item })));
+				} else if (responseData) {
+					returnData.push({ json: responseData as IDataObject });
+				}
+				
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({ 
+						json: { 
+							error: error.message,
+							resource: this.getNodeParameter('resource', i),
+							operation: this.getNodeParameter('operation', i),
+						} 
+					});
+					continue;
+				}
+				throw error;
+			}
+		}
+		
+		return [returnData];
+	}
 }
