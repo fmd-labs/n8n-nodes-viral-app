@@ -8,7 +8,7 @@ import {
 export class ViralAppApi implements ICredentialType {
 	name = 'viralAppApi';
 	displayName = 'ViralApp API';
-	documentationUrl = 'https://viral.app/api/docs';
+	documentationUrl = 'https://viral.app/api/v1/docs';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
