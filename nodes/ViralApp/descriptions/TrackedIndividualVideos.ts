@@ -289,23 +289,9 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 						required: true,
 						description: 'Platform-specific video ID',
 					},
-					{
-						displayName: 'URL',
-						name: 'url',
-						type: 'string',
-						default: '',
-						description: 'Full URL to the video (optional)',
-					},
 				],
 			},
 		],
-		routing: {
-			send: {
-				type: 'body',
-				property: 'videos',
-				value: '={{$value.video}}',
-			},
-		},
 	},
 
 	// ----------------------------------------

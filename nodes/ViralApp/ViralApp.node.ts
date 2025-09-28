@@ -463,7 +463,9 @@ export class ViralApp implements INodeType {
 							responseData = response.data;
 						}
 					} else if (operation === 'add') {
-						const videos = this.getNodeParameter('videos', i) as IDataObject[];
+						const videosData = this.getNodeParameter('videos', i) as IDataObject;
+						// Extract the video array from the fixedCollection structure
+						const videos = videosData.video as IDataObject[];
 						responseData = await viralAppApiRequest.call(
 							this, 'POST', '/videos/tracked', { videos }
 						);
