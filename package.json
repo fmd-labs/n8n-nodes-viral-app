@@ -1,19 +1,24 @@
 {
-  "name": "n8n-nodes-starter",
+  "name": "n8n-nodes-viralapp",
   "version": "0.1.0",
-  "description": "",
+  "description": "n8n node for ViralApp API - Video analytics for TikTok, Instagram, and YouTube",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "viralapp",
+    "analytics",
+    "tiktok",
+    "instagram",
+    "youtube"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://viral.app",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "ViralApp",
+    "email": "support@viral.app"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/viralapp/n8n-nodes-viralapp.git"
   },
   "engines": {
     "node": ">=18.10",
@@ -36,12 +41,10 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ExampleCredentialsApi.credentials.js",
-      "dist/credentials/HttpBinApi.credentials.js"
+      "dist/credentials/ViralAppApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js"
+      "dist/nodes/ViralApp/ViralApp.node.js"
     ]
   },
   "devDependencies": {
