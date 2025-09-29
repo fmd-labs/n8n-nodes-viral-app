@@ -162,7 +162,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 	},
 
 	// ----------------------------------------
-	//      videoAnalytics: getAll, getActivity, export
+	//      videoAnalytics: getAll
 	// ----------------------------------------
 	{
 		displayName: 'Return All',
@@ -171,7 +171,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
-				operation: ['getAll', 'getActivity'],
+				operation: ['getAll'],
 			},
 		},
 		default: false,
@@ -184,7 +184,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
-				operation: ['getAll', 'getActivity'],
+				operation: ['getAll'],
 				returnAll: [false],
 			},
 		},
