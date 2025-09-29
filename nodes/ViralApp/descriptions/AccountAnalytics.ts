@@ -24,15 +24,6 @@ export const accountAnalyticsOperations: INodeProperties[] = [
 						qs: {
 							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
 							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
-							sortCol: '={{$parameter.sortCol}}',
-							sortDir: '={{$parameter.sortDir}}',
-							search: '={{$parameter.search}}',
-							platforms: '={{$parameter.platforms}}',
-							accounts: '={{$parameter.accounts}}',
-							projects: '={{$parameter.projects}}',
-							dateRangeFrom: '={{$parameter.dateRangeFrom}}',
-							dateRangeTo: '={{$parameter.dateRangeTo}}',
-							contentTypes: '={{$parameter.contentTypes}}',
 						},
 					},
 					output: {
@@ -198,6 +189,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'dateRange[from]',
+						value: '={{$value.split("T")[0]}}',
 					},
 				},
 			},
@@ -211,6 +203,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'dateRange[to]',
+						value: '={{$value.split("T")[0]}}',
 					},
 				},
 			},
