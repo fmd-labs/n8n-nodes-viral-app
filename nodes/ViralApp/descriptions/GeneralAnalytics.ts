@@ -152,14 +152,16 @@ export const generalAnalyticsFields: INodeProperties[] = [
 			{
 				displayName: 'Projects',
 				name: 'projects',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of project IDs',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by projects (select multiple)',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'projects',
-						value: '={{$value.split(",").map(p => p.trim())}}',
 					},
 				},
 			},

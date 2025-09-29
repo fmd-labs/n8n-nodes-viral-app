@@ -254,6 +254,22 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				},
 			},
 			{
+				displayName: 'Projects',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by projects (select multiple)',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'projects',
+					},
+				},
+			},
+			{
 				displayName: 'Date Range From',
 				name: 'dateRangeFrom',
 				type: 'dateTime',
