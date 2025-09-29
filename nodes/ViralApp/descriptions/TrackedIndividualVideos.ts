@@ -203,6 +203,19 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 			},
 		],
 	},
+	{
+		displayName: 'Simplify',
+		name: 'simplify',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['trackedIndividualVideos'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return a simplified version of the response instead of the raw data',
+	},
 
 	// ----------------------------------------
 	//   trackedIndividualVideos: add
@@ -250,12 +263,13 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 						description: 'Platform where the video is hosted',
 					},
 					{
-						displayName: 'Video ID',
+						displayName: 'Video URL or ID',
 						name: 'videoId',
 						type: 'string',
 						default: '',
 						required: true,
-						description: 'Platform-specific video ID',
+						placeholder: 'e.g. https://tiktok.com/@user/video/123 or video ID',
+						description: 'Full video URL or platform-specific video ID',
 					},
 				],
 			},
@@ -308,12 +322,13 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 						description: 'Platform where the video is hosted',
 					},
 					{
-						displayName: 'Video ID',
+						displayName: 'Video URL or ID',
 						name: 'videoId',
 						type: 'string',
 						default: '',
 						required: true,
-						description: 'Platform-specific video ID',
+						placeholder: 'e.g. https://tiktok.com/@user/video/123 or video ID',
+						description: 'Full video URL or platform-specific video ID',
 					},
 				],
 			},

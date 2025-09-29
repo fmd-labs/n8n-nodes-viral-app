@@ -13,10 +13,10 @@ export const projectsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Get Many',
-				value: 'getAll',
-				description: 'List many projects',
-				action: 'List all projects',
+				name: 'Add Account',
+				value: 'addAccount',
+				description: 'Add an account to a project',
+				action: 'Add account to project',
 			},
 			{
 				name: 'Create',
@@ -25,28 +25,28 @@ export const projectsOperations: INodeProperties[] = [
 				action: 'Create a project',
 			},
 			{
-				name: 'Update',
-				value: 'update',
-				description: 'Update an existing project',
-				action: 'Update a project',
-			},
-			{
 				name: 'Delete',
 				value: 'delete',
 				description: 'Delete a project',
 				action: 'Delete a project',
 			},
 			{
-				name: 'Add Account',
-				value: 'addAccount',
-				description: 'Add an account to a project',
-				action: 'Add account to project',
+				name: 'Get Many',
+				value: 'getAll',
+				description: 'List many projects',
+				action: 'List all projects',
 			},
 			{
 				name: 'Remove Account',
 				value: 'removeAccount',
 				description: 'Remove an account from a project',
 				action: 'Remove account from project',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				description: 'Update an existing project',
+				action: 'Update a project',
 			},
 		],
 		default: 'getAll',

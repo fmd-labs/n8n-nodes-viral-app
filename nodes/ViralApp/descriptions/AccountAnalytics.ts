@@ -164,14 +164,14 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Projects',
+				displayName: 'Project Names or IDs',
 				name: 'projects',
 				type: 'multiOptions',
 				typeOptions: {
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple)',
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -236,14 +236,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Published At',
-						value: 'publishedAt',
-					},
-					{
-						name: 'View Count',
-						value: 'viewCount',
-					},
-					{
 						name: 'Engagement Rate',
 						value: 'engagementRate',
 					},
@@ -252,8 +244,16 @@ export const accountAnalyticsFields: INodeProperties[] = [
 						value: 'followerCount',
 					},
 					{
+						name: 'Published At',
+						value: 'publishedAt',
+					},
+					{
 						name: 'Total Views',
 						value: 'totalViews',
+					},
+					{
+						name: 'View Count',
+						value: 'viewCount',
 					},
 					{
 						name: 'Virality Rate',
@@ -292,6 +292,19 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				},
 			},
 		],
+	},
+	{
+		displayName: 'Simplify',
+		name: 'simplify',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['accountAnalytics'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return a simplified version of the response instead of the raw data',
 	},
 
 	// ----------------------------------------

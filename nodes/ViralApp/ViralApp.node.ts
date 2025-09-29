@@ -46,12 +46,12 @@ export class ViralApp implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Account Analytics',
+						name: 'Account Analytic',
 						value: 'accountAnalytics',
 						description: 'Analytics for tracked accounts',
 					},
 					{
-						name: 'General Analytics',
+						name: 'General Analytic',
 						value: 'generalAnalytics',
 						description: 'General analytics and overview',
 					},
@@ -76,7 +76,7 @@ export class ViralApp implements INodeType {
 						description: 'Manage and monitor individual tracked videos',
 					},
 					{
-						name: 'Video Analytics',
+						name: 'Video Analytic',
 						value: 'videoAnalytics',
 						description: 'Analytics for tracked videos',
 					},
@@ -270,6 +270,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -284,6 +285,22 @@ export class ViralApp implements INodeType {
 							);
 							responseData = response.data;
 						}
+						
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								username: item.username,
+								platform: item.platform,
+								followerCount: item.followerCount,
+								totalVideos: item.totalVideos,
+								totalViews: item.totalViews,
+								avgViews: item.avgViews,
+								engagementRate: item.engagementRate,
+								viralityRate: item.viralityRate,
+								createdAt: item.createdAt
+							}));
+						}
 					} else if (operation === 'export') {
 						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
 						responseData = await viralAppApiRequest.call(
@@ -297,6 +314,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -310,6 +328,20 @@ export class ViralApp implements INodeType {
 								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
+						}
+						
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								username: item.username,
+								platform: item.platform,
+								status: item.status,
+								maxVideos: item.maxVideos,
+								lastSyncedAt: item.lastSyncedAt,
+								createdAt: item.createdAt,
+								videoCount: item.videoCount
+							}));
 						}
 					} else if (operation === 'add') {
 						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
@@ -397,6 +429,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -410,6 +443,22 @@ export class ViralApp implements INodeType {
 								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
+						}
+						
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								platformVideoId: item.platformVideoId,
+								platform: item.platform,
+								title: item.title,
+								viewCount: item.viewCount,
+								likeCount: item.likeCount,
+								commentCount: item.commentCount,
+								shareCount: item.shareCount,
+								engagementRate: item.engagementRate,
+								publishedAt: item.publishedAt
+							}));
 						}
 					} else if (operation === 'get') {
 						const platform = this.getNodeParameter('platform', i) as string;
@@ -441,6 +490,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -454,6 +504,20 @@ export class ViralApp implements INodeType {
 								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
+						}
+						
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								platformVideoId: item.platformVideoId,
+								platform: item.platform,
+								status: item.status,
+								lastSyncedAt: item.lastSyncedAt,
+								createdAt: item.createdAt,
+								viewCount: item.viewCount,
+								engagementRate: item.engagementRate
+							}));
 						}
 					} else if (operation === 'add') {
 						const videosData = this.getNodeParameter('videos', i) as IDataObject;
@@ -515,9 +579,11 @@ export class ViralApp implements INodeType {
 						const projectId = this.getNodeParameter('projectId', i, undefined, {
 							extractValue: true,
 						}) as string;
-						responseData = await viralAppApiRequest.call(
+						await viralAppApiRequest.call(
 							this, 'DELETE', `/projects/${projectId}`
 						);
+						// Return standardized delete response
+						responseData = { deleted: true };
 					} else if (operation === 'addAccount') {
 						const projectId = this.getNodeParameter('projectId', i, undefined, {
 							extractValue: true,

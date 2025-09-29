@@ -13,6 +13,30 @@ export const trackedAccountsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Add',
+				value: 'add',
+				description: 'Add new tracked accounts',
+				action: 'Add tracked accounts',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '/accounts/tracked',
+					},
+				},
+			},
+			{
+				name: 'Get Count',
+				value: 'getCount',
+				description: 'Get count of tracked accounts',
+				action: 'Get tracked accounts count',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/accounts/tracked/count',
+					},
+				},
+			},
+			{
 				name: 'Get Many',
 				value: 'getAll',
 				description: 'List many tracked accounts',
@@ -46,30 +70,6 @@ export const trackedAccountsOperations: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Add',
-				value: 'add',
-				description: 'Add new tracked accounts',
-				action: 'Add tracked accounts',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/accounts/tracked',
-					},
-				},
-			},
-			{
-				name: 'Get Count',
-				value: 'getCount',
-				description: 'Get count of tracked accounts',
-				action: 'Get tracked accounts count',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/accounts/tracked/count',
-					},
-				},
-			},
-			{
 				name: 'Refresh',
 				value: 'refresh',
 				description: 'Refresh tracked accounts data',
@@ -82,18 +82,6 @@ export const trackedAccountsOperations: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Update Max Videos',
-				value: 'updateMaxVideos',
-				description: 'Update maximum videos to track for an account',
-				action: 'Update max videos for tracked account',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/accounts/tracked/{{$parameter.accountId}}/max-videos',
-					},
-				},
-			},
-			{
 				name: 'Update Hashtags',
 				value: 'updateHashtags',
 				description: 'Update hashtag filters for an account',
@@ -102,6 +90,18 @@ export const trackedAccountsOperations: INodeProperties[] = [
 					request: {
 						method: 'PUT',
 						url: '=/accounts/tracked/{{$parameter.accountId}}/hashtags',
+					},
+				},
+			},
+			{
+				name: 'Update Max Videos',
+				value: 'updateMaxVideos',
+				description: 'Update maximum videos to track for an account',
+				action: 'Update max videos for tracked account',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '=/accounts/tracked/{{$parameter.accountId}}/max-videos',
 					},
 				},
 			},
@@ -210,14 +210,14 @@ export const trackedAccountsFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Projects',
+				displayName: 'Project Names or IDs',
 				name: 'projects',
 				type: 'multiOptions',
 				typeOptions: {
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple)',
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -280,6 +280,19 @@ export const trackedAccountsFields: INodeProperties[] = [
 			},
 		],
 	},
+	{
+		displayName: 'Simplify',
+		name: 'simplify',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['trackedAccounts'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return a simplified version of the response instead of the raw data',
+	},
 
 	// ----------------------------------------
 	//        trackedAccounts: add
@@ -331,7 +344,8 @@ export const trackedAccountsFields: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						required: true,
-						description: 'Account username on the platform',
+						placeholder: 'e.g. viral_creator (without @)',
+						description: 'Account username on the platform (without the @ symbol)',
 					},
 					{
 						displayName: 'Max Videos',
@@ -339,7 +353,7 @@ export const trackedAccountsFields: INodeProperties[] = [
 						type: 'options',
 						options: [
 							{
-								name: '0 (Disable tracking)',
+								name: '0 (Disable Tracking)',
 								value: 0,
 							},
 							{
@@ -375,6 +389,7 @@ export const trackedAccountsFields: INodeProperties[] = [
 						name: 'hashtagsFilter',
 						type: 'string',
 						default: '',
+						placeholder: 'e.g. brand,marketing,viral',
 						description: 'Comma-separated list of hashtags to filter content',
 					},
 				],
@@ -500,7 +515,7 @@ export const trackedAccountsFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: '0 (Disable tracking)',
+				name: '0 (Disable Tracking)',
 				value: 0,
 			},
 			{

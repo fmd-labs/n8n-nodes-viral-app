@@ -13,38 +13,14 @@ export const generalAnalyticsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Get KPIs',
-				value: 'getKpis',
-				description: 'Get key performance indicators',
-				action: 'Get key performance indicators',
+				name: 'Export Daily Gains',
+				value: 'exportDailyGains',
+				description: 'Export video daily gains to CSV',
+				action: 'Export video daily gains',
 				routing: {
 					request: {
-						method: 'GET',
-						url: '/analytics/kpis',
-					},
-				},
-			},
-			{
-				name: 'Get Top Videos',
-				value: 'getTopVideos',
-				description: 'Get top performing videos',
-				action: 'Get top performing videos',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/top-videos',
-					},
-				},
-			},
-			{
-				name: 'Get Top Accounts',
-				value: 'getTopAccounts',
-				description: 'Get top performing accounts',
-				action: 'Get top performing accounts',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/top-accounts',
+						method: 'POST',
+						url: '/analytics/video-daily-gains/export',
 					},
 				},
 			},
@@ -61,14 +37,38 @@ export const generalAnalyticsOperations: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Export Daily Gains',
-				value: 'exportDailyGains',
-				description: 'Export video daily gains to CSV',
-				action: 'Export video daily gains',
+				name: 'Get KPIs',
+				value: 'getKpis',
+				description: 'Get key performance indicators',
+				action: 'Get key performance indicators',
 				routing: {
 					request: {
-						method: 'POST',
-						url: '/analytics/video-daily-gains/export',
+						method: 'GET',
+						url: '/analytics/kpis',
+					},
+				},
+			},
+			{
+				name: 'Get Top Accounts',
+				value: 'getTopAccounts',
+				description: 'Get top performing accounts',
+				action: 'Get top performing accounts',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/analytics/top-accounts',
+					},
+				},
+			},
+			{
+				name: 'Get Top Videos',
+				value: 'getTopVideos',
+				description: 'Get top performing videos',
+				action: 'Get top performing videos',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/analytics/top-videos',
 					},
 				},
 			},
@@ -148,14 +148,14 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Projects',
+				displayName: 'Project Names or IDs',
 				name: 'projects',
 				type: 'multiOptions',
 				typeOptions: {
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple)',
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',

@@ -13,6 +13,54 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Export',
+				value: 'export',
+				description: 'Export videos to CSV',
+				action: 'Export videos to CSV',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '/videos/export',
+					},
+				},
+			},
+			{
+				name: 'Get',
+				value: 'get',
+				description: 'Get specific video metrics',
+				action: 'Get specific video metrics',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/videos/{{$parameter.platform}}/{{$parameter.platformVideoId}}',
+					},
+				},
+			},
+			{
+				name: 'Get Activity',
+				value: 'getActivity',
+				description: 'Get video activity timeline',
+				action: 'Get video activity timeline',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/videos/activity',
+					},
+				},
+			},
+			{
+				name: 'Get History',
+				value: 'getHistory',
+				description: 'Get video history metrics',
+				action: 'Get video history metrics',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/videos/{{$parameter.platform}}/{{$parameter.platformVideoId}}/history',
+					},
+				},
+			},
+			{
 				name: 'Get Many',
 				value: 'getAll',
 				description: 'List tracked videos with analytics',
@@ -42,54 +90,6 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 								},
 							},
 						],
-					},
-				},
-			},
-			{
-				name: 'Get',
-				value: 'get',
-				description: 'Get specific video metrics',
-				action: 'Get specific video metrics',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '=/videos/{{$parameter.platform}}/{{$parameter.platformVideoId}}',
-					},
-				},
-			},
-			{
-				name: 'Get History',
-				value: 'getHistory',
-				description: 'Get video history metrics',
-				action: 'Get video history metrics',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '=/videos/{{$parameter.platform}}/{{$parameter.platformVideoId}}/history',
-					},
-				},
-			},
-			{
-				name: 'Get Activity',
-				value: 'getActivity',
-				description: 'Get video activity timeline',
-				action: 'Get video activity timeline',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/videos/activity',
-					},
-				},
-			},
-			{
-				name: 'Export',
-				value: 'export',
-				description: 'Export videos to CSV',
-				action: 'Export videos to CSV',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/videos/export',
 					},
 				},
 			},
@@ -254,14 +254,14 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Projects',
+				displayName: 'Project Names or IDs',
 				name: 'projects',
 				type: 'multiOptions',
 				typeOptions: {
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple)',
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -296,5 +296,18 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				},
 			},
 		],
+	},
+	{
+		displayName: 'Simplify',
+		name: 'simplify',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return a simplified version of the response instead of the raw data',
 	},
 ];

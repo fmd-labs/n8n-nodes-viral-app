@@ -6,6 +6,7 @@ import {
 	IHttpRequestOptions,
 	IHttpRequestMethods,
 	NodeApiError,
+	JsonObject,
 } from 'n8n-workflow';
 
 /**
@@ -38,7 +39,28 @@ export async function viralAppApiRequest(
 			options,
 		);
 	} catch (error) {
-		throw new NodeApiError(this.getNode(), error);
+		if (error.httpCode === '404') {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Resource not found',
+				description: 'The requested resource could not be found. Please check the ID and try again.',
+			});
+		}
+		
+		if (error.httpCode === '401') {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Authentication failed',
+				description: 'Please check your API key in the credentials.',
+			});
+		}
+		
+		if (error.httpCode === '429') {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Rate limit exceeded',
+				description: 'Too many requests. Please wait a moment and try again.',
+			});
+		}
+		
+		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }
 
