@@ -137,6 +137,27 @@ pnpm lintfix
 
 ## Version History
 
+### 0.2.0
+- **Major improvements to API parameter coverage and data simplification**
+- Add complete parameter coverage for all API endpoints:
+  * Projects: Add name filter for searching projects
+  * GeneralAnalytics: Add contentTypes filter to interaction-metrics and KPIs operations
+  * Integrations: Add provider, search, sortCol, and sortDir parameters for comprehensive filtering
+  * TrackedIndividualVideos: Add search parameter for finding specific videos
+- Implement Simplify option across all data operations:
+  * GeneralAnalytics: All 4 operations now support simplified output
+  * Projects: getAll operation returns essential fields only when simplified
+  * Integrations: getApps operation provides streamlined app information
+- Fix critical date handling issues in General Analytics:
+  * Properly format dates to YYYY-MM-DD for API compatibility
+  * Remove conflicting routing configurations
+  * Ensure consistent date processing across all operations
+- Fix data structure issues in simplify operations:
+  * Correct field mapping for getKpis (videoCount, viewCount, etc.)
+  * Fix getInteractionMetrics to properly access nested dailyMetrics array
+  * Remove non-existent fields and add missing ones (bookmarks)
+- Improve overall node reliability and user experience
+
 ### 0.1.2
 - Move @typescript-eslint/utils from devDependencies to dependencies to fix n8n package scanner compatibility
 
