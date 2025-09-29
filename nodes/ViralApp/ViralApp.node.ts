@@ -328,39 +328,15 @@ export class ViralApp implements INodeType {
 						// Wrap the count number in an object for n8n
 						responseData = { count };
 					} else if (operation === 'refresh') {
-						const accountIdsParam = this.getNodeParameter('accountIds', i, undefined, { extractValue: true });
-						// Handle both array and comma-separated string inputs
-						const accountIds = Array.isArray(accountIdsParam) 
-							? accountIdsParam 
-							: typeof accountIdsParam === 'string' 
-								? accountIdsParam.split(',').map(id => id.trim()).filter(id => id)
-								: [];
+						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
+						// Extract the account array from the fixedCollection structure
+						const accounts = accountsData.account as IDataObject[];
 						
-						// First, get account details to retrieve platform info for each account
-						const accounts = await viralAppApiRequestAllItems.call(
-							this, 'GET', '/accounts/tracked'
-						);
-						
-						// Create a map of account ID to platform and platformAccountId
-						const accountMap = new Map();
-						accounts.forEach((account: any) => {
-							accountMap.set(account.id, {
-								platform: account.platform,
-								platformAccountId: account.platformAccountId
-							});
-						});
-						
-						// Build the items array with platform and platformAccountId info
-						const items = accountIds.map(accountId => {
-							const accountInfo = accountMap.get(accountId);
-							if (!accountInfo) {
-								throw new Error(`Account not found for ID: ${accountId}`);
-							}
-							return {
-								platform: accountInfo.platform,
-								id: accountInfo.platformAccountId
-							};
-						});
+						// Build items array for API
+						const items = accounts.map(account => ({
+							platform: account.platform as string,
+							id: account.accountId as string
+						}));
 						
 						responseData = await viralAppApiRequest.call(
 							this, 'POST', '/accounts/tracked/refresh', { items }

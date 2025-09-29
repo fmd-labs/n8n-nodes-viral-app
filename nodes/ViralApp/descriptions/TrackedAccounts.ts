@@ -403,39 +403,57 @@ export const trackedAccountsFields: INodeProperties[] = [
 	// ----------------------------------------
 	{
 		displayName: 'Accounts',
-		name: 'accountIds',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: [] },
-		required: true,
+		name: 'accounts',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		displayOptions: {
 			show: {
 				resource: ['trackedAccounts'],
 				operation: ['refresh'],
 			},
 		},
-		modes: [
+		default: {},
+		required: true,
+		options: [
 			{
-				displayName: 'From List',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select accounts...',
-				typeOptions: {
-					searchListMethod: 'trackedAccountSearch',
-					searchable: true,
-				},
-			},
-			{
-				displayName: 'By IDs',
-				name: 'id',
-				type: 'string',
-				placeholder: 'Enter account IDs (comma-separated)',
+				displayName: 'Account',
+				name: 'account',
+				values: [
+					{
+						displayName: 'Platform',
+						name: 'platform',
+						type: 'options',
+						options: [
+							{
+								name: 'Instagram',
+								value: 'instagram',
+							},
+							{
+								name: 'TikTok',
+								value: 'tiktok',
+							},
+							{
+								name: 'YouTube',
+								value: 'youtube',
+							},
+						],
+						default: 'tiktok',
+						required: true,
+						description: 'Platform where the account is hosted',
+					},
+					{
+						displayName: 'Account ID',
+						name: 'accountId',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Platform-specific account ID (not the organization account ID)',
+					},
+				],
 			},
 		],
-		description: 'Accounts to refresh',
-		extractValue: {
-			type: 'regex',
-			regex: '^[a-zA-Z0-9-_,]+$',
-		},
 	},
 
 	// ----------------------------------------
