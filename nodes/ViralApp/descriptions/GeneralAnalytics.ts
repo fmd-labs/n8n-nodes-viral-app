@@ -79,7 +79,91 @@ export const generalAnalyticsOperations: INodeProperties[] = [
 
 export const generalAnalyticsFields: INodeProperties[] = [
 	// ----------------------------------------
-	//      Common Filters
+	//      Required Date Fields
+	// ----------------------------------------
+	{
+		displayName: 'Date Range From',
+		name: 'dateRangeFrom',
+		type: 'dateTime',
+		required: true,
+		default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
+		description: 'Start date (YYYY-MM-DD)',
+		displayOptions: {
+			show: {
+				resource: ['generalAnalytics'],
+				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
+			},
+		},
+		routing: {
+			send: {
+				type: 'query',
+				property: 'dateRange[from]',
+			},
+		},
+	},
+	{
+		displayName: 'Date Range To',
+		name: 'dateRangeTo',
+		type: 'dateTime',
+		required: true,
+		default: '={{$today.toFormat("yyyy-MM-dd")}}',
+		description: 'End date (YYYY-MM-DD)',
+		displayOptions: {
+			show: {
+				resource: ['generalAnalytics'],
+				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
+			},
+		},
+		routing: {
+			send: {
+				type: 'query',
+				property: 'dateRange[to]',
+			},
+		},
+	},
+	// Date fields for Export Daily Gains (POST request with body)
+	{
+		displayName: 'Date Range From',
+		name: 'dateRangeFrom',
+		type: 'dateTime',
+		required: true,
+		default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
+		description: 'Start date (YYYY-MM-DD)',
+		displayOptions: {
+			show: {
+				resource: ['generalAnalytics'],
+				operation: ['exportDailyGains'],
+			},
+		},
+		routing: {
+			send: {
+				type: 'body',
+				property: 'dateRange.from',
+			},
+		},
+	},
+	{
+		displayName: 'Date Range To',
+		name: 'dateRangeTo',
+		type: 'dateTime',
+		required: true,
+		default: '={{$today.toFormat("yyyy-MM-dd")}}',
+		description: 'End date (YYYY-MM-DD)',
+		displayOptions: {
+			show: {
+				resource: ['generalAnalytics'],
+				operation: ['exportDailyGains'],
+			},
+		},
+		routing: {
+			send: {
+				type: 'body',
+				property: 'dateRange.to',
+			},
+		},
+	},
+	// ----------------------------------------
+	//      Optional Filters
 	// ----------------------------------------
 	{
 		displayName: 'Filters',
@@ -94,32 +178,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				displayName: 'Date Range From',
-				name: 'dateRangeFrom',
-				type: 'dateTime',
-				default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
-				description: 'Start date (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[from]',
-					},
-				},
-			},
-			{
-				displayName: 'Date Range To',
-				name: 'dateRangeTo',
-				type: 'dateTime',
-				default: '={{$today.toFormat("yyyy-MM-dd")}}',
-				description: 'End date (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[to]',
-					},
-				},
-			},
 			{
 				displayName: 'Platforms',
 				name: 'platforms',

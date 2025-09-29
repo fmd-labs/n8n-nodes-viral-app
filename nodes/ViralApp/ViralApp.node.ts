@@ -767,28 +767,65 @@ export class ViralApp implements INodeType {
 				else if (resource === 'generalAnalytics') {
 					if (operation === 'getTopVideos') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
+						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const queryParams = {
+							...filters,
+							'dateRange[from]': dateRangeFrom,
+							'dateRange[to]': dateRangeTo,
+						};
 						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/top-videos', {}, filters
+							this, 'GET', '/analytics/top-videos', {}, queryParams
 						);
 					} else if (operation === 'getTopAccounts') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
+						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const queryParams = {
+							...filters,
+							'dateRange[from]': dateRangeFrom,
+							'dateRange[to]': dateRangeTo,
+						};
 						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/top-accounts', {}, filters
+							this, 'GET', '/analytics/top-accounts', {}, queryParams
 						);
 					} else if (operation === 'getKpis') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
+						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const queryParams = {
+							...filters,
+							'dateRange[from]': dateRangeFrom,
+							'dateRange[to]': dateRangeTo,
+						};
 						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/kpis', {}, filters
+							this, 'GET', '/analytics/kpis', {}, queryParams
 						);
 					} else if (operation === 'getInteractionMetrics') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
+						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const queryParams = {
+							...filters,
+							'dateRange[from]': dateRangeFrom,
+							'dateRange[to]': dateRangeTo,
+						};
 						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/interaction-metrics', {}, filters
+							this, 'GET', '/analytics/interaction-metrics', {}, queryParams
 						);
 					} else if (operation === 'exportDailyGains') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
+						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const body = {
+							...filters,
+							dateRange: {
+								from: dateRangeFrom,
+								to: dateRangeTo,
+							},
+						};
 						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/analytics/video-daily-gains/export', filters
+							this, 'POST', '/analytics/video-daily-gains/export', body
 						);
 					}
 				}
