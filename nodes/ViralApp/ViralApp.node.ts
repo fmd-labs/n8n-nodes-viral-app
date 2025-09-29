@@ -62,12 +62,12 @@ export class ViralApp implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Account Analytic',
+						name: 'Account Analytics',
 						value: 'accountAnalytics',
 						description: 'Analytics for tracked accounts',
 					},
 					{
-						name: 'General Analytic',
+						name: 'Video Analytics',
 						value: 'generalAnalytics',
 						description: 'General analytics and overview',
 					},
