@@ -62,6 +62,26 @@ export class ViralApp implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
+						name: 'Account Data',
+						value: 'accountAnalytics',
+						description: 'Analytics for tracked accounts',
+					},
+					{
+						name: 'General Data',
+						value: 'generalAnalytics',
+						description: 'General analytics and overview',
+					},
+					{
+						name: 'Integration',
+						value: 'integrations',
+						description: 'Third-party integrations',
+					},
+					{
+						name: 'Project',
+						value: 'projects',
+						description: 'Project management',
+					},
+					{
 						name: 'Tracked Account',
 						value: 'trackedAccounts',
 						description: 'Manage and monitor tracked accounts',
@@ -72,29 +92,9 @@ export class ViralApp implements INodeType {
 						description: 'Manage and monitor individual tracked videos',
 					},
 					{
-						name: 'Account Analytics',
-						value: 'accountAnalytics',
-						description: 'Analytics for tracked accounts',
-					},
-					{
-						name: 'Video Analytics',
+						name: 'Video Data',
 						value: 'videoAnalytics',
 						description: 'Analytics for tracked videos',
-					},
-					{
-						name: 'General Analytics',
-						value: 'generalAnalytics',
-						description: 'General analytics and overview',
-					},
-					{
-						name: 'Project',
-						value: 'projects',
-						description: 'Project management',
-					},
-					{
-						name: 'Integration',
-						value: 'integrations',
-						description: 'Third-party integrations',
 					},
 				],
 				default: 'trackedAccounts',

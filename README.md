@@ -33,14 +33,14 @@ npm install n8n-nodes-viral-app
 
 The ViralApp node supports the following resources and operations:
 
-### Account Analytics
+### Account Data
 - **Get Top Videos** - Retrieve top performing videos for tracked accounts
 - **Get Top Accounts** - Get top performing accounts from your tracked list
 - **Get KPIs** - Fetch key performance indicators for accounts
 - **Get Interaction Metrics** - Retrieve interaction metrics for accounts
 - **Export Daily Gains** - Export daily gains data for accounts
 
-### Video Analytics  
+### Video Data  
 - **Get Top Videos** - Retrieve top performing videos
 - **Get Top Accounts** - Get accounts with top performing videos
 - **Get KPIs** - Fetch video performance KPIs
@@ -76,7 +76,7 @@ The ViralApp node supports the following resources and operations:
 - **Get Many** - List integrations
 - **Update** - Modify integration settings
 
-### General Analytics
+### General Data
 - **Get Categories** - Retrieve available content categories
 - **Get Countries** - Get list of supported countries
 - **Get Performance KPIs** - Fetch performance KPIs
@@ -140,10 +140,10 @@ pnpm lintfix
 ### 0.1.0
 - Initial release
 - Support for all major ViralApp API endpoints
-- Account Analytics operations
-- Video Analytics operations  
+- Account Data operations
+- Video Data operations  
 - Tracked Accounts management
 - Tracked Individual Videos management
 - Projects management
 - Integrations management
-- General Analytics operations
+- General Data operations
