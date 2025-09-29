@@ -730,6 +730,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -743,6 +744,18 @@ export class ViralApp implements INodeType {
 								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
+						}
+
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								name: item.name,
+								description: item.description,
+								logo: item.logo,
+								trackedAccountsCount: Array.isArray(item.trackedAccounts) ? item.trackedAccounts.length : 0,
+								createdAt: item.createdAt
+							}));
 						}
 					} else if (operation === 'create') {
 						const name = this.getNodeParameter('name', i) as string;
@@ -795,6 +808,7 @@ export class ViralApp implements INodeType {
 					if (operation === 'getApps') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
@@ -809,6 +823,18 @@ export class ViralApp implements INodeType {
 							);
 							responseData = response.data;
 						}
+
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								title: item.title,
+								provider: item.provider,
+								lastSeenAt: item.lastSeenAt,
+								nextSyncAt: item.nextSyncAt,
+								createdAt: item.createdAt
+							}));
+						}
 					}
 				}
 				
@@ -818,6 +844,7 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
@@ -827,10 +854,25 @@ export class ViralApp implements INodeType {
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/top-videos', {}, queryParams
 						);
+
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								platform: item.platform,
+								accountUsername: item.accountUsername,
+								caption: item.caption,
+								viewCount: item.viewCount,
+								likeCount: item.likeCount,
+								engagementRate: item.engagementRate,
+								publishedAt: item.publishedAt
+							}));
+						}
 					} else if (operation === 'getTopAccounts') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
@@ -840,10 +882,24 @@ export class ViralApp implements INodeType {
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/top-accounts', {}, queryParams
 						);
+
+						// Apply simplify if requested
+						if (simplify && Array.isArray(responseData)) {
+							responseData = responseData.map((item: IDataObject) => ({
+								id: item.id,
+								platform: item.platform,
+								username: item.username,
+								followerCount: item.followerCount,
+								totalVideos: item.totalVideos,
+								totalViews: item.totalViews,
+								engagementRate: item.engagementRate
+							}));
+						}
 					} else if (operation === 'getKpis') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
@@ -853,10 +909,23 @@ export class ViralApp implements INodeType {
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/kpis', {}, queryParams
 						);
+
+						// Apply simplify if requested (KPIs are usually single objects)
+						if (simplify && responseData) {
+							responseData = {
+								videoCount: responseData.videoCount,
+								viewCount: responseData.viewCount,
+								likeCount: responseData.likeCount,
+								commentCount: responseData.commentCount,
+								shareCount: responseData.shareCount,
+								engagementRate: responseData.engagementRate
+							};
+						}
 					} else if (operation === 'getInteractionMetrics') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
 						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
@@ -866,6 +935,18 @@ export class ViralApp implements INodeType {
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/interaction-metrics', {}, queryParams
 						);
+
+						// Apply simplify if requested (response has dailyMetrics array)
+						if (simplify && responseData && responseData.dailyMetrics) {
+							responseData = responseData.dailyMetrics.map((item: IDataObject) => ({
+								date: item.date,
+								views: item.views,
+								likes: item.likes,
+								comments: item.comments,
+								shares: item.shares,
+								bookmarks: item.bookmarks
+							}));
+						}
 					} else if (operation === 'exportDailyGains') {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;

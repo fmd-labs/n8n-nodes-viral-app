@@ -116,6 +116,19 @@ export const projectsFields: INodeProperties[] = [
 			},
 		],
 	},
+	{
+		displayName: 'Simplify',
+		name: 'simplify',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['projects'],
+				operation: ['getAll'],
+			},
+		},
+		default: false,
+		description: 'Whether to return a simplified version of the response instead of the raw data',
+	},
 
 	// ----------------------------------------
 	//        projects: create
