@@ -215,7 +215,7 @@ export class ViralApp implements INodeType {
 				const response = await viralAppApiRequest.call(
 					this,
 					'GET',
-					'/videos',
+					'/videos/tracked',
 					{},
 					query,
 				);
@@ -228,8 +228,8 @@ export class ViralApp implements INodeType {
 				
 				return {
 					results: response.data.map((video: IDataObject) => ({
-						name: `${video.title || video.description || 'Untitled'} (${platformDisplay[video.platform as string] || video.platform})`,
-						value: video.id as string,
+						name: `${video.platformVideoId} (${platformDisplay[video.platform as string] || video.platform})`,
+						value: `${video.platform}:${video.platformVideoId}`,
 					})),
 					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
 				};
@@ -470,14 +470,18 @@ export class ViralApp implements INodeType {
 							this, 'POST', '/videos/tracked', { videos }
 						);
 					} else if (operation === 'refresh') {
-						// TODO: API expects 'items' array with {platform, id} objects  
-						// Current implementation only has video IDs, would need platform info
-						const videoIds = this.getNodeParameter('videoIds', i, undefined, { extractValue: true }) as string[];
+						const videosData = this.getNodeParameter('videos', i) as IDataObject;
+						// Extract the video array from the fixedCollection structure
+						const videos = videosData.video as IDataObject[];
 						
-						// For now, keeping the existing structure - this may need API adjustment
-						// or fetching video details first to get platform info
+						// Build items array for API
+						const items = videos.map(video => ({
+							platform: video.platform as string,
+							id: video.videoId as string
+						}));
+						
 						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/videos/tracked/refresh', { videoIds }
+							this, 'POST', '/videos/tracked/refresh', { items }
 						);
 					}
 				}

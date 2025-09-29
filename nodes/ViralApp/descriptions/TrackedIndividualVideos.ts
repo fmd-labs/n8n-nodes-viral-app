@@ -299,46 +299,57 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 	// ----------------------------------------
 	{
 		displayName: 'Videos',
-		name: 'videoIds',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: [] },
-		required: true,
+		name: 'videos',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		displayOptions: {
 			show: {
 				resource: ['trackedIndividualVideos'],
 				operation: ['refresh'],
 			},
 		},
-		modes: [
+		default: {},
+		required: true,
+		options: [
 			{
-				displayName: 'From List',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select videos...',
-				typeOptions: {
-					searchListMethod: 'videoSearch',
-					searchable: true,
-				},
-			},
-			{
-				displayName: 'By IDs',
-				name: 'id',
-				type: 'string',
-				placeholder: 'Enter video IDs (comma-separated)',
+				displayName: 'Video',
+				name: 'video',
+				values: [
+					{
+						displayName: 'Platform',
+						name: 'platform',
+						type: 'options',
+						options: [
+							{
+								name: 'Instagram',
+								value: 'instagram',
+							},
+							{
+								name: 'TikTok',
+								value: 'tiktok',
+							},
+							{
+								name: 'YouTube',
+								value: 'youtube',
+							},
+						],
+						default: 'tiktok',
+						required: true,
+						description: 'Platform where the video is hosted',
+					},
+					{
+						displayName: 'Video ID',
+						name: 'videoId',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Platform-specific video ID',
+					},
+				],
 			},
 		],
-		description: 'Videos to refresh',
-		extractValue: {
-			type: 'regex',
-			regex: '^[a-zA-Z0-9-_,]+$',
-		},
-		routing: {
-			send: {
-				type: 'body',
-				property: 'videoIds',
-				value: '={{typeof $value === "string" ? $value.split(",").map(id => id.trim()) : $value}}',
-			},
-		},
 	},
 
 ];
