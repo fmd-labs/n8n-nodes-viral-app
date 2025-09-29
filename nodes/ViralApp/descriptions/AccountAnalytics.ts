@@ -105,7 +105,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['accountAnalytics'],
-				operation: ['getAll', 'export'],
+				operation: ['getAll'],
 			},
 		},
 		options: [
@@ -355,6 +355,43 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
+			},
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description: 'Filter by specific accounts',
+			},
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by specific projects',
+			},
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
 			},
 			{
 				displayName: 'Date Range',

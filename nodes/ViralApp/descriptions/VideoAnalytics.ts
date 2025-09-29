@@ -209,20 +209,36 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
-				operation: ['getAll', 'getActivity', 'export'],
+				operation: ['getAll', 'getActivity'],
 			},
 		},
 		options: [
 			{
-				displayName: 'Search',
-				name: 'search',
+				displayName: 'Account Username',
+				name: 'accountUsername',
 				type: 'string',
 				default: '',
-				description: 'Search by video title or description',
+				description: 'Account username on the platform',
 				routing: {
 					send: {
 						type: 'query',
-						property: 'search',
+						property: 'accountUsername',
+					},
+				},
+			},
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'accounts',
 					},
 				},
 			},
@@ -279,6 +295,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'dateRange[from]',
+						value: '={{$value.split("T")[0]}}',
 					},
 				},
 			},
@@ -292,6 +309,80 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'dateRange[to]',
+						value: '={{$value.split("T")[0]}}',
+					},
+				},
+			},
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'contentTypes',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Column',
+				name: 'sortCol',
+				type: 'options',
+				options: [
+					{
+						name: 'Engagement Rate',
+						value: 'engagementRate',
+					},
+					{
+						name: 'Published At',
+						value: 'publishedAt',
+					},
+					{
+						name: 'View Count',
+						value: 'viewCount',
+					},
+				],
+				default: 'publishedAt',
+				description: 'Column to sort by',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortCol',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Direction',
+				name: 'sortDir',
+				type: 'options',
+				options: [
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+				default: 'desc',
+				description: 'Sort direction',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortDir',
 					},
 				},
 			},
@@ -309,5 +400,163 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		},
 		default: false,
 		description: 'Whether to return a simplified version of the response instead of the raw data',
+	},
+
+	// ----------------------------------------
+	//      videoAnalytics: export
+	// ----------------------------------------
+	{
+		displayName: 'Export Filters',
+		name: 'exportBody',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['export'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Account Username',
+				name: 'accountUsername',
+				type: 'string',
+				default: '',
+				description: 'Account username on the platform',
+			},
+			{
+				displayName: 'Platforms',
+				name: 'platforms',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Instagram',
+						value: 'instagram',
+					},
+					{
+						name: 'TikTok',
+						value: 'tiktok',
+					},
+					{
+						name: 'YouTube',
+						value: 'youtube',
+					},
+				],
+				default: [],
+				description: 'Filter by social media platforms',
+			},
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
+			},
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'Date Range',
+				name: 'dateRange',
+				type: 'fixedCollection',
+				default: {},
+				options: [
+					{
+						displayName: 'Date Range',
+						name: 'range',
+						values: [
+							{
+								displayName: 'From',
+								name: 'from',
+								type: 'dateTime',
+								default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
+								required: true,
+								description: 'Start date (YYYY-MM-DD)',
+							},
+							{
+								displayName: 'To',
+								name: 'to',
+								type: 'dateTime',
+								default: '={{$today.toFormat("yyyy-MM-dd")}}',
+								required: true,
+								description: 'End date (YYYY-MM-DD)',
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'Sort Column',
+				name: 'sortCol',
+				type: 'options',
+				options: [
+					{
+						name: 'Engagement Rate',
+						value: 'engagementRate',
+					},
+					{
+						name: 'Published At',
+						value: 'publishedAt',
+					},
+					{
+						name: 'View Count',
+						value: 'viewCount',
+					},
+				],
+				default: 'publishedAt',
+				description: 'Column to sort by',
+			},
+			{
+				displayName: 'Sort Direction',
+				name: 'sortDir',
+				type: 'options',
+				options: [
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+				default: 'desc',
+				description: 'Sort direction',
+			},
+		],
+		routing: {
+			send: {
+				type: 'body',
+				property: '={{Object.assign({}, $value, $value.dateRange?.range ? {dateRange: {from: $value.dateRange.range[0].from.split("T")[0], to: $value.dateRange.range[0].to.split("T")[0]}} : {})}}',
+			},
+		},
 	},
 ];

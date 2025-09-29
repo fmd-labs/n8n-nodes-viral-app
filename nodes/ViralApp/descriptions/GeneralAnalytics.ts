@@ -174,7 +174,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				displayOptions: {
 					show: {
-						'/operation': ['getTopVideos', 'getInteractionMetrics', 'exportDailyGains'],
+						'/operation': ['getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
 					},
 				},
 				routing: {
@@ -195,13 +195,76 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 				typeOptions: {
 					minValue: 1,
+					maxValue: 100,
 				},
-				default: 50,
-				description: 'Max number of results to return',
+				default: 20,
+				description: 'Max number of results to return (1-100)',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'limit',
+					},
+				},
+			},
+			{
+				displayName: 'Only Published',
+				name: 'onlyPublished',
+				type: 'boolean',
+				displayOptions: {
+					show: {
+						'/operation': ['getTopVideos', 'getTopAccounts'],
+					},
+				},
+				default: false,
+				description: 'Whether to include only published content',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'onlyPublished',
+					},
+				},
+			},
+			{
+				displayName: 'Metric',
+				name: 'metric',
+				type: 'options',
+				displayOptions: {
+					show: {
+						'/operation': ['getTopVideos', 'getTopAccounts'],
+					},
+				},
+				options: [
+					{
+						name: 'View Count',
+						value: 'viewCount',
+					},
+					{
+						name: 'Like Count',
+						value: 'likeCount',
+					},
+					{
+						name: 'Comment Count',
+						value: 'commentCount',
+					},
+					{
+						name: 'Share Count',
+						value: 'shareCount',
+					},
+					{
+						name: 'Engagement Rate',
+						value: 'engagementRate',
+					},
+					{
+						name: 'Follower Count',
+						value: 'followerCount',
+					},
+				],
+				default: 'viewCount',
+				description: 'Metric to use for ranking results',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'metric',
 					},
 				},
 			},

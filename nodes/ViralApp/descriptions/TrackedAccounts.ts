@@ -231,23 +231,31 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Published At',
-						value: 'publishedAt',
+						name: 'Username',
+						value: 'username',
 					},
 					{
-						name: 'View Count',
-						value: 'viewCount',
+						name: 'Platform',
+						value: 'platform',
 					},
 					{
-						name: 'Engagement Rate',
-						value: 'engagementRate',
+						name: 'Follower Count',
+						value: 'followerCount',
 					},
 					{
 						name: 'Created At',
 						value: 'createdAt',
 					},
+					{
+						name: 'Updated At',
+						value: 'updatedAt',
+					},
+					{
+						name: 'Max Videos',
+						value: 'maxVideos',
+					},
 				],
-				default: 'publishedAt',
+				default: 'createdAt',
 				description: 'Column to sort by',
 				routing: {
 					send: {
@@ -271,6 +279,7 @@ export const trackedAccountsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
+				description: 'Direction to sort the results',
 				routing: {
 					send: {
 						type: 'query',
