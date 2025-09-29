@@ -614,8 +614,55 @@ export class ViralApp implements INodeType {
 						);
 					} else if (operation === 'export') {
 						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
+						
+						// Build clean request body, handling the nested dateRange structure
+						const requestBody: IDataObject = {};
+						
+						// Add simple string/array fields if they have values
+						if (exportBody.accountUsername) {
+							requestBody.accountUsername = exportBody.accountUsername;
+						}
+						if (exportBody.platforms && (exportBody.platforms as string[]).length > 0) {
+							requestBody.platforms = exportBody.platforms;
+						}
+						if (exportBody.accounts && (exportBody.accounts as string[]).length > 0) {
+							requestBody.accounts = exportBody.accounts;
+						}
+						if (exportBody.contentTypes && (exportBody.contentTypes as string[]).length > 0) {
+							requestBody.contentTypes = exportBody.contentTypes;
+						}
+						if (exportBody.projects && (exportBody.projects as string[]).length > 0) {
+							requestBody.projects = exportBody.projects;
+						}
+						
+						// Handle the nested dateRange from fixedCollection
+						if (exportBody.dateRange && typeof exportBody.dateRange === 'object') {
+							const dateRangeData = exportBody.dateRange as IDataObject;
+							if (dateRangeData.range && Array.isArray(dateRangeData.range) && dateRangeData.range.length > 0) {
+								const range = dateRangeData.range[0] as IDataObject;
+								if (range.from && range.to) {
+									// Extract date part from datetime strings
+									const fromDate = (range.from as string).split('T')[0];
+									const toDate = (range.to as string).split('T')[0];
+									requestBody.dateRange = {
+										from: fromDate,
+										to: toDate
+									};
+								}
+							}
+						}
+						
+						// Add optional sorting parameters if provided
+						if (exportBody.sortCol) {
+							requestBody.sortCol = exportBody.sortCol;
+						}
+						if (exportBody.sortDir) {
+							requestBody.sortDir = exportBody.sortDir;
+						}
+						
+						// Make the API request with the clean body
 						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/videos/export', exportBody
+							this, 'POST', '/videos/export', requestBody
 						);
 					}
 				}

@@ -17,12 +17,6 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 				value: 'export',
 				description: 'Export videos to CSV',
 				action: 'Export videos to CSV',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/videos/export',
-					},
-				},
 			},
 			{
 				name: 'Get',
@@ -550,11 +544,5 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				default: 'desc',
 			},
 		],
-		routing: {
-			send: {
-				type: 'body',
-				property: '={{Object.assign({}, $value, $value.dateRange?.range ? {dateRange: {from: $value.dateRange.range[0].from.split("T")[0], to: $value.dateRange.range[0].to.split("T")[0]}} : {})}}',
-			},
-		},
 	},
 ];

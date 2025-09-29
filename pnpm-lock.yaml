@@ -12,6 +12,9 @@ importers:
         specifier: '*'
         version: 1.48.0
     devDependencies:
+      '@types/node':
+        specifier: ^24.5.2
+        version: 24.5.2
       '@typescript-eslint/parser':
         specifier: ^7.15.0
         version: 7.15.0(eslint@8.57.0)(typescript@5.5.3)
@@ -91,6 +94,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/node@24.5.2':
+    resolution: {integrity: sha512-FYxk1I7wPv3K2XBaoyH2cTnocQEu8AOZ60hPbsyukMPLv5/5qr7V1i8PLHdl6Zf87I+xZXFvPCXYjiTFq+YSDQ==}
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -1898,6 +1904,9 @@ packages:
     resolution: {integrity: sha512-/RXwi5m/Mu3H6IHQGww3GNt1PNXlbeCuclF2QYR14L/2CHPz3DFZkvB5hZ0N/QUkiXWCACML2jXViIQEQc2MLg==}
     engines: {node: '>= 0.10'}
 
+  undici-types@7.12.0:
+    resolution: {integrity: sha512-goOacqME2GYyOZZfb5Lgtu+1IDmAlAEu5xnD3+xTzS10hT0vzpf0SPjkXwAw9Jm+4n/mQGDP3LO8CPbYROeBfQ==}
+
   union-value@1.0.1:
     resolution: {integrity: sha512-tJfXmxMeWYnczCVs7XAEvIV7ieppALdyepWMkHkwciRpZraG/xwT+s2JN8+pr1+8jCRf80FFzvr+MpQeeoF4Xg==}
     engines: {node: '>=0.10.0'}
@@ -2096,6 +2105,10 @@ snapshots:
       fastq: 1.13.0
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/node@24.5.2':
+    dependencies:
+      undici-types: 7.12.0
 
   '@types/semver@7.5.8': {}
 
@@ -4140,6 +4153,8 @@ snapshots:
       object.defaults: 1.1.0
       object.reduce: 1.0.1
       undertaker-registry: 1.0.1
+
+  undici-types@7.12.0: {}
 
   union-value@1.0.1:
     dependencies:

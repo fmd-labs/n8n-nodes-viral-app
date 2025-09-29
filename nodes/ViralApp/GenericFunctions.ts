@@ -19,25 +19,48 @@ export async function viralAppApiRequest(
 	body: any = {},
 	query: IDataObject = {},
 ): Promise<any> {
+	// Ensure body is always a valid object for POST requests, never undefined or null
+	if (method === 'POST') {
+		if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
+			// Explicitly set an empty object that won't be stripped
+			body = {};
+		}
+	}
+	
 	const options: IHttpRequestOptions = {
 		method,
 		url: `https://viral.app/api/v1${endpoint}`,
 		body,
 		qs: query,
 		json: true,
+		headers: {},
 	};
 
-	// Remove empty body for GET requests
+	// Remove body for GET requests only
 	if (method === 'GET') {
 		delete options.body;
 	}
+	
+	// For POST requests with empty body, ensure Content-Type is set and body is properly formatted
+	// This applies to all export endpoints that might receive empty filters
+	if (method === 'POST' && (endpoint === '/videos/export' || endpoint === '/accounts/export' || endpoint === '/analytics/video-daily-gains/export')) {
+		// Force set headers to ensure proper content type
+		(options.headers as IDataObject)['Content-Type'] = 'application/json';
+		// If body is empty, explicitly stringify it
+		if (Object.keys(body).length === 0) {
+			options.body = JSON.stringify({});
+			options.json = false; // Since we're manually stringifying
+		}
+	}
 
 	try {
-		return await this.helpers.httpRequestWithAuthentication.call(
+		const response = await this.helpers.httpRequestWithAuthentication.call(
 			this,
 			'viralAppApi',
 			options,
 		);
+		
+		return response;
 	} catch (error) {
 		if (error.httpCode === '404') {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
