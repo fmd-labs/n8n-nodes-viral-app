@@ -608,7 +608,7 @@ export class ViralApp implements INodeType {
 							this, 'GET', `/videos/${platform}/${platformVideoId}/history`
 						);
 					} else if (operation === 'getActivity') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const filters = this.getNodeParameter('activityFilters', i, {}) as IDataObject;
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/videos/activity', {}, filters
 						);

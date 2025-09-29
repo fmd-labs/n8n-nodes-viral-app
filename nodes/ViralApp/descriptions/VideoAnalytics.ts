@@ -35,12 +35,6 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 				value: 'getActivity',
 				description: 'Get video activity timeline',
 				action: 'Get video activity timeline',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/videos/activity',
-					},
-				},
 			},
 			{
 				name: 'Get History',
@@ -162,7 +156,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 	},
 
 	// ----------------------------------------
-	//      videoAnalytics: getAll
+	//      videoAnalytics: getAll, export
 	// ----------------------------------------
 	{
 		displayName: 'Return All',
@@ -203,7 +197,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
-				operation: ['getAll', 'getActivity'],
+				operation: ['getAll'],
 			},
 		},
 		options: [
@@ -393,6 +387,94 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		},
 		default: false,
 		description: 'Whether to return a simplified version of the response instead of the raw data',
+	},
+
+	// ----------------------------------------
+	//      videoAnalytics: getActivity
+	// ----------------------------------------
+	{
+		displayName: 'Filters',
+		name: 'activityFilters',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getActivity'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Days',
+				name: 'days',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+					maxValue: 365,
+				},
+				default: 365,
+				description: 'Number of days to look back for activity data (1-365 days)',
+			},
+			{
+				displayName: 'Platforms',
+				name: 'platforms',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Instagram',
+						value: 'instagram',
+					},
+					{
+						name: 'TikTok',
+						value: 'tiktok',
+					},
+					{
+						name: 'YouTube',
+						value: 'youtube',
+					},
+				],
+				default: [],
+				description: 'Filter by platforms',
+			},
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
+			},
+		],
 	},
 
 	// ----------------------------------------
