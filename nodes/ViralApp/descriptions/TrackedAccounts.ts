@@ -231,28 +231,28 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Username',
-						value: 'username',
-					},
-					{
-						name: 'Platform',
-						value: 'platform',
+						name: 'Created At',
+						value: 'createdAt',
 					},
 					{
 						name: 'Follower Count',
 						value: 'followerCount',
 					},
 					{
-						name: 'Created At',
-						value: 'createdAt',
+						name: 'Max Videos',
+						value: 'maxVideos',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
 					},
 					{
 						name: 'Updated At',
 						value: 'updatedAt',
 					},
 					{
-						name: 'Max Videos',
-						value: 'maxVideos',
+						name: 'Username',
+						value: 'username',
 					},
 				],
 				default: 'createdAt',

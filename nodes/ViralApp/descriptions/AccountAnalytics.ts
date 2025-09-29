@@ -364,7 +364,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description: 'Filter by specific accounts',
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -374,7 +374,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by specific projects',
+				description: 'Filter by specific projects. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Content Types',

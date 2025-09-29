@@ -378,7 +378,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				description: 'Sort direction',
 				routing: {
 					send: {
 						type: 'query',
@@ -549,7 +548,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				description: 'Sort direction',
 			},
 		],
 		routing: {
