@@ -137,6 +137,9 @@ pnpm lintfix
 
 ## Version History
 
+### 0.1.2
+- Move @typescript-eslint/utils from devDependencies to dependencies to fix n8n package scanner compatibility
+
 ### 0.1.1
 - Fix ESLint compatibility by adding @typescript-eslint/utils dependency
 - Improve API request handling for POST requests
