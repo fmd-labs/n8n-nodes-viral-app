@@ -729,17 +729,18 @@ export class ViralApp implements INodeType {
 				else if (resource === 'projects') {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/projects'
+								this, 'GET', '/projects', {}, filters
 							);
 						} else {
 							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page  
+							const page = 1; // Default page
 							const response = await viralAppApiRequest.call(
-								this, 'GET', '/projects', {}, 
-								{ page, perPage: limit }
+								this, 'GET', '/projects', {},
+								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
 						}
@@ -793,17 +794,18 @@ export class ViralApp implements INodeType {
 				else if (resource === 'integrations') {
 					if (operation === 'getApps') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/apps'
+								this, 'GET', '/apps', {}, filters
 							);
 						} else {
 							const limit = this.getNodeParameter('limit', i) as number;
 							const page = 1; // Default page
 							const response = await viralAppApiRequest.call(
-								this, 'GET', '/apps', {}, 
-								{ page, perPage: limit }
+								this, 'GET', '/apps', {},
+								{ ...filters, page, perPage: limit }
 							);
 							responseData = response.data;
 						}
@@ -816,10 +818,11 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
-							'dateRange[from]': dateRangeFrom,
-							'dateRange[to]': dateRangeTo,
+							'dateRange[from]': dateRangeFrom.split('T')[0],
+							'dateRange[to]': dateRangeTo.split('T')[0],
 						};
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/top-videos', {}, queryParams
@@ -828,10 +831,11 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
-							'dateRange[from]': dateRangeFrom,
-							'dateRange[to]': dateRangeTo,
+							'dateRange[from]': dateRangeFrom.split('T')[0],
+							'dateRange[to]': dateRangeTo.split('T')[0],
 						};
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/top-accounts', {}, queryParams
@@ -840,10 +844,11 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
-							'dateRange[from]': dateRangeFrom,
-							'dateRange[to]': dateRangeTo,
+							'dateRange[from]': dateRangeFrom.split('T')[0],
+							'dateRange[to]': dateRangeTo.split('T')[0],
 						};
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/kpis', {}, queryParams
@@ -852,10 +857,11 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const queryParams = {
 							...filters,
-							'dateRange[from]': dateRangeFrom,
-							'dateRange[to]': dateRangeTo,
+							'dateRange[from]': dateRangeFrom.split('T')[0],
+							'dateRange[to]': dateRangeTo.split('T')[0],
 						};
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/interaction-metrics', {}, queryParams
@@ -864,11 +870,12 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
 						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
+						// Extract just the date part (YYYY-MM-DD) from the datetime string
 						const body = {
 							...filters,
 							dateRange: {
-								from: dateRangeFrom,
-								to: dateRangeTo,
+								from: dateRangeFrom.split('T')[0],
+								to: dateRangeTo.split('T')[0],
 							},
 						};
 						responseData = await viralAppApiRequest.call(

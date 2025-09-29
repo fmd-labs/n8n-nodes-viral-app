@@ -122,6 +122,20 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 		},
 		options: [
 			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search videos by ID or title',
+				placeholder: 'e.g. video title or ID',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'search',
+					},
+				},
+			},
+			{
 				displayName: 'Platforms',
 				name: 'platforms',
 				type: 'multiOptions',

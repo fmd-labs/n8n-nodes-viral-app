@@ -94,12 +94,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
 			},
 		},
-		routing: {
-			send: {
-				type: 'query',
-				property: 'dateRange[from]',
-			},
-		},
+		// Routing removed - handled in execute function
 	},
 	{
 		displayName: 'Date Range To',
@@ -114,12 +109,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
 			},
 		},
-		routing: {
-			send: {
-				type: 'query',
-				property: 'dateRange[to]',
-			},
-		},
+		// Routing removed - handled in execute function
 	},
 	// Date fields for Export Daily Gains (POST request with body)
 	{
@@ -135,12 +125,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				operation: ['exportDailyGains'],
 			},
 		},
-		routing: {
-			send: {
-				type: 'body',
-				property: 'dateRange.from',
-			},
-		},
+		// Routing removed - handled in execute function
 	},
 	{
 		displayName: 'Date Range To',
@@ -155,12 +140,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				operation: ['exportDailyGains'],
 			},
 		},
-		routing: {
-			send: {
-				type: 'body',
-				property: 'dateRange.to',
-			},
-		},
+		// Routing removed - handled in execute function
 	},
 	// ----------------------------------------
 	//      Optional Filters
@@ -260,7 +240,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				description: 'Filter by content types (video, slideshow)',
 				displayOptions: {
 					show: {
-						'/operation': ['getTopVideos', 'getTopAccounts'],
+						'/operation': ['getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'getKpis'],
 					},
 				},
 				routing: {

@@ -87,6 +87,35 @@ export const projectsFields: INodeProperties[] = [
 		default: 50,
 		description: 'Max number of results to return',
 	},
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['projects'],
+				operation: ['getAll'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Name',
+				name: 'name',
+				type: 'string',
+				default: '',
+				description: 'Filter projects by name',
+				placeholder: 'e.g. Marketing Campaign',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'name',
+					},
+				},
+			},
+		],
+	},
 
 	// ----------------------------------------
 	//        projects: create

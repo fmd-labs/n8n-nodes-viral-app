@@ -57,4 +57,100 @@ export const integrationsFields: INodeProperties[] = [
 		default: 50,
 		description: 'Max number of results to return',
 	},
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['integrations'],
+				operation: ['getApps'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Provider',
+				name: 'provider',
+				type: 'string',
+				default: '',
+				description: 'Filter by integration provider',
+				placeholder: 'e.g. zapier',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'provider',
+					},
+				},
+			},
+			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search apps by name or description',
+				placeholder: 'e.g. analytics',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'search',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Column',
+				name: 'sortCol',
+				type: 'options',
+				options: [
+					{
+						name: 'Created At',
+						value: 'createdAt',
+					},
+					{
+						name: 'Name',
+						value: 'name',
+					},
+					{
+						name: 'Provider',
+						value: 'provider',
+					},
+					{
+						name: 'Updated At',
+						value: 'updatedAt',
+					},
+				],
+				default: 'createdAt',
+				description: 'Column to sort by',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortCol',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Direction',
+				name: 'sortDir',
+				type: 'options',
+				options: [
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+				default: 'desc',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortDir',
+					},
+				},
+			},
+		],
+	},
 ];
