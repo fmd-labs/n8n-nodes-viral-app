@@ -140,6 +140,10 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					searchListMethod: 'videoSearch',
 					searchable: true,
 				},
+				extractValue: {
+					type: 'regex',
+					regex: '^[^:]+:(.+)$',
+				},
 			},
 			{
 				displayName: 'By ID',
@@ -149,10 +153,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 			},
 		],
 		description: 'The video to get analytics for',
-		extractValue: {
-			type: 'regex',
-			regex: '^[a-zA-Z0-9-_]+$',
-		},
 	},
 
 	// ----------------------------------------
