@@ -232,13 +232,41 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				displayOptions: {
 					show: {
-						'/operation': ['getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
+						'/operation': ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
 					},
 				},
 				routing: {
 					send: {
 						type: 'query',
 						property: 'accounts',
+					},
+				},
+			},
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+					{
+						name: 'Video',
+						value: 'video',
+					},
+				],
+				default: [],
+				description: 'Filter by content types (video, slideshow)',
+				displayOptions: {
+					show: {
+						'/operation': ['getTopVideos', 'getTopAccounts'],
+					},
+				},
+				routing: {
+					send: {
+						type: 'query',
+						property: 'contentTypes',
 					},
 				},
 			},
@@ -253,10 +281,9 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 				typeOptions: {
 					minValue: 1,
-					maxValue: 100,
 				},
-				default: 20,
-				description: 'Max number of results to return (1-100)',
+				default: 50,
+				description: 'Max number of results to return',
 				routing: {
 					send: {
 						type: 'query',
@@ -282,43 +309,154 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					},
 				},
 			},
+			// Metric for Get Top Videos
 			{
 				displayName: 'Metric',
 				name: 'metric',
 				type: 'options',
 				displayOptions: {
 					show: {
-						'/operation': ['getTopVideos', 'getTopAccounts'],
+						'/operation': ['getTopVideos'],
+					},
+				},
+				options: [
+					// Period-specific metrics
+					{
+						name: 'Bookmark Count (In Period)',
+						value: 'bookmarkCountInPeriod',
+					},
+					{
+						name: 'Bookmark Count (Lifetime)',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count (In Period)',
+						value: 'commentCountInPeriod',
+					},
+					{
+						name: 'Comment Count (Lifetime)',
+						value: 'commentCount',
+					},
+					{
+						name: 'Engagement Rate (In Period)',
+						value: 'engagementRateInPeriod',
+					},
+					{
+						name: 'Engagement Rate (Lifetime)',
+						value: 'engagementRate',
+					},
+					{
+						name: 'Like Count (In Period)',
+						value: 'likeCountInPeriod',
+					},
+					{
+						name: 'Like Count (Lifetime)',
+						value: 'likeCount',
+					},
+					{
+						name: 'Share Count (In Period)',
+						value: 'shareCountInPeriod',
+					},
+					{
+						name: 'Share Count (Lifetime)',
+						value: 'shareCount',
+					},
+					{
+						name: 'View Count (In Period)',
+						value: 'viewCountInPeriod',
+					},
+					{
+						name: 'View Count (Lifetime)',
+						value: 'viewCount',
+					},
+				],
+				default: 'viewCount',
+				description: 'Metric to sort videos by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'metric',
+					},
+				},
+			},
+			// Metric for Get Top Accounts
+			{
+				displayName: 'Metric',
+				name: 'metric',
+				type: 'options',
+				displayOptions: {
+					show: {
+						'/operation': ['getTopAccounts'],
 					},
 				},
 				options: [
 					{
-						name: 'View Count',
-						value: 'viewCount',
+						name: 'Average Views Per Video (In Period)',
+						value: 'averageViewsPerVideoInPeriod',
 					},
 					{
-						name: 'Like Count',
-						value: 'likeCount',
+						name: 'Average Views Per Video (Lifetime)',
+						value: 'averageViewsPerVideo',
 					},
 					{
-						name: 'Comment Count',
+						name: 'Bookmark Count (In Period)',
+						value: 'bookmarkCountInPeriod',
+					},
+					{
+						name: 'Bookmark Count (Lifetime)',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count (In Period)',
+						value: 'commentCountInPeriod',
+					},
+					{
+						name: 'Comment Count (Lifetime)',
 						value: 'commentCount',
 					},
 					{
-						name: 'Share Count',
-						value: 'shareCount',
+						name: 'Engagement Rate (In Period)',
+						value: 'engagementRateInPeriod',
 					},
 					{
-						name: 'Engagement Rate',
+						name: 'Engagement Rate (Lifetime)',
 						value: 'engagementRate',
 					},
 					{
-						name: 'Follower Count',
-						value: 'followerCount',
+						name: 'Like Count (In Period)',
+						value: 'likeCountInPeriod',
+					},
+					{
+						name: 'Like Count (Lifetime)',
+						value: 'likeCount',
+					},
+					{
+						name: 'Share Count (In Period)',
+						value: 'shareCountInPeriod',
+					},
+					{
+						name: 'Share Count (Lifetime)',
+						value: 'shareCount',
+					},
+					{
+						name: 'Video Count (In Period)',
+						value: 'videoCountInPeriod',
+					},
+					{
+						name: 'Video Count (Lifetime)',
+						value: 'videoCount',
+					},
+					{
+						name: 'View Count (In Period)',
+						value: 'viewCountInPeriod',
+					},
+					{
+						name: 'View Count (Lifetime)',
+						value: 'viewCount',
 					},
 				],
 				default: 'viewCount',
-				description: 'Metric to use for ranking results',
+				description: 'Metric to sort accounts by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
 				routing: {
 					send: {
 						type: 'query',
