@@ -1,46 +1,149 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-viral-app
 
-# n8n-nodes-starter
+This is an n8n community node that lets you use ViralApp in your n8n workflows.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](n8n.io). It includes the node linter and other dependencies.
+ViralApp is a comprehensive video analytics platform that provides insights and tracking for content across TikTok, Instagram, and YouTube. It helps creators and businesses monitor their social media performance, track competitors, and discover trending content.
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-## Prerequisites
+## Table of Contents
+- [Installation](#installation)  
+- [Operations](#operations)  
+- [Credentials](#credentials)  
+- [Compatibility](#compatibility)  
+- [Resources](#resources)  
+- [Version History](#version-history)
 
-You need the following installed on your development machine:
+## Installation
 
-* [git](https://git-scm.com/downloads)
-* Node.js and pnpm. Minimum version Node 18. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  pnpm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-## Using this starter
+### npm Installation
+```bash
+npm install n8n-nodes-viral-app
+```
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+### GUI Installation
+1. Go to **Settings** > **Community Nodes**
+2. Click **Install**
+3. Enter `n8n-nodes-viral-app`
+4. Click **Install**
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `pnpm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `pnpm lint` to check for errors or `pnpm lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+## Operations
 
-## More information
+The ViralApp node supports the following resources and operations:
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+### Account Analytics
+- **Get Top Videos** - Retrieve top performing videos for tracked accounts
+- **Get Top Accounts** - Get top performing accounts from your tracked list
+- **Get KPIs** - Fetch key performance indicators for accounts
+- **Get Interaction Metrics** - Retrieve interaction metrics for accounts
+- **Export Daily Gains** - Export daily gains data for accounts
+
+### Video Analytics  
+- **Get Top Videos** - Retrieve top performing videos
+- **Get Top Accounts** - Get accounts with top performing videos
+- **Get KPIs** - Fetch video performance KPIs
+- **Get Interaction Metrics** - Retrieve video interaction metrics
+- **Export Daily Gains** - Export daily video gains data
+
+### Tracked Accounts
+- **Create** - Add a new tracked account
+- **Delete** - Remove a tracked account
+- **Get** - Retrieve details of a specific tracked account
+- **Get Many** - List multiple tracked accounts with filtering
+- **Update** - Modify tracked account settings
+- **Export Daily Gains** - Export daily gains for tracked accounts
+
+### Tracked Individual Videos
+- **Create** - Add a new tracked video
+- **Delete** - Remove a tracked video
+- **Get** - Retrieve details of a specific tracked video
+- **Get Many** - List multiple tracked videos
+- **Update** - Modify tracked video settings
+
+### Projects
+- **Create** - Create a new project
+- **Delete** - Remove a project
+- **Get** - Retrieve project details
+- **Get Many** - List multiple projects
+- **Update** - Modify project settings
+
+### Integrations
+- **Create** - Set up a new integration
+- **Delete** - Remove an integration
+- **Get** - Retrieve integration details
+- **Get Many** - List integrations
+- **Update** - Modify integration settings
+
+### General Analytics
+- **Get Categories** - Retrieve available content categories
+- **Get Countries** - Get list of supported countries
+- **Get Performance KPIs** - Fetch performance KPIs
+- **Get Top Videos** - Retrieve overall top performing videos
+
+## Credentials
+
+To use this node, you need to authenticate with the ViralApp API.
+
+### Prerequisites
+1. Sign up for a ViralApp account at [viral.app](https://viral.app)
+2. Navigate to your account settings
+3. Generate an API key
+
+### Setting up credentials in n8n
+1. In n8n, go to **Credentials** > **New**
+2. Select **ViralApp API** from the list
+3. Enter your API key
+4. Click **Save**
+
+## Compatibility
+
+- **Minimum n8n version:** 1.0.0
+- **Tested with:** n8n 1.0.0 and above
+- **Node.js:** 18.10.0 or higher
+
+## Resources
+
+* [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
+* [ViralApp API documentation](https://viral.app/api-docs)
+* [ViralApp website](https://viral.app)
+* [Support](mailto:support@viral.app)
+
+## Development
+
+To contribute to this node or run it locally for development:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build the node
+pnpm build
+
+# Run in development mode
+pnpm dev
+
+# Run linter
+pnpm lint
+
+# Run linter and auto-fix
+pnpm lintfix
+```
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+[MIT](LICENSE.md)
+
+## Version History
+
+### 0.1.0
+- Initial release
+- Support for all major ViralApp API endpoints
+- Account Analytics operations
+- Video Analytics operations  
+- Tracked Accounts management
+- Tracked Individual Videos management
+- Projects management
+- Integrations management
+- General Analytics operations

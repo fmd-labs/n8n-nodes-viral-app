@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-viralapp",
+  "name": "n8n-nodes-viral-app",
   "version": "0.1.0",
   "description": "n8n node for ViralApp API - Video analytics for TikTok, Instagram, and YouTube",
   "keywords": [
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/viralapp/n8n-nodes-viralapp.git"
+    "url": "https://github.com/fmd-labs/n8n-nodes-viral-app.git"
   },
   "engines": {
     "node": ">=18.10",
