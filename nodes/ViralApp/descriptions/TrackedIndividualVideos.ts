@@ -263,13 +263,51 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 						description: 'Platform where the video is hosted',
 					},
 					{
-						displayName: 'Video URL or ID',
+						displayName: 'Video',
 						name: 'videoId',
-						type: 'string',
-						default: '',
+						type: 'resourceLocator',
+						default: { mode: 'url', value: '' },
 						required: true,
-						placeholder: 'e.g. https://tiktok.com/@user/video/123 or video ID',
-						description: 'Full video URL or platform-specific video ID',
+						description: 'The video to track',
+						modes: [
+							{
+								displayName: 'By URL',
+								name: 'url',
+								type: 'string',
+								hint: 'Enter full video URL from TikTok, Instagram, or YouTube',
+								placeholder: 'e.g. https://www.tiktok.com/@user/video/123456789',
+								validation: [
+									{
+										type: 'regex',
+										properties: {
+											regex: '^https?://(www\.)?(tiktok\.com|instagram\.com|youtube\.com|youtu\.be)',
+											errorMessage: 'Please enter a valid TikTok, Instagram, or YouTube URL',
+										},
+									},
+								],
+								extractValue: {
+									type: 'regex',
+									regex: '(?:tiktok\.com.*?video/([0-9]+)|instagram\.com.*?(?:reel|p)/([A-Za-z0-9_-]+)|(?:youtube\.com.*?v=|youtu\.be/)([A-Za-z0-9_-]{11}))',
+								},
+							},
+							{
+								displayName: 'By ID',
+								name: 'id',
+								type: 'string',
+								hint: 'Enter platform-specific video ID',
+								placeholder: 'e.g. 7234567890123456789 (TikTok), CAbCdEfGhIj (Instagram), dQw4w9WgXcQ (YouTube)',
+							},
+							{
+								displayName: 'From List',
+								name: 'list',
+								type: 'list',
+								typeOptions: {
+									searchListMethod: 'allVideosSearch',
+									searchable: true,
+									searchFilterRequired: false,
+								},
+							},
+						],
 					},
 				],
 			},
@@ -322,13 +360,51 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 						description: 'Platform where the video is hosted',
 					},
 					{
-						displayName: 'Video URL or ID',
+						displayName: 'Video',
 						name: 'videoId',
-						type: 'string',
-						default: '',
+						type: 'resourceLocator',
+						default: { mode: 'url', value: '' },
 						required: true,
-						placeholder: 'e.g. https://tiktok.com/@user/video/123 or video ID',
-						description: 'Full video URL or platform-specific video ID',
+						description: 'The video to refresh data for',
+						modes: [
+							{
+								displayName: 'By URL',
+								name: 'url',
+								type: 'string',
+								hint: 'Enter full video URL from TikTok, Instagram, or YouTube',
+								placeholder: 'e.g. https://www.tiktok.com/@user/video/123456789',
+								validation: [
+									{
+										type: 'regex',
+										properties: {
+											regex: '^https?://(www\.)?(tiktok\.com|instagram\.com|youtube\.com|youtu\.be)',
+											errorMessage: 'Please enter a valid TikTok, Instagram, or YouTube URL',
+										},
+									},
+								],
+								extractValue: {
+									type: 'regex',
+									regex: '(?:tiktok\.com.*?video/([0-9]+)|instagram\.com.*?(?:reel|p)/([A-Za-z0-9_-]+)|(?:youtube\.com.*?v=|youtu\.be/)([A-Za-z0-9_-]{11}))',
+								},
+							},
+							{
+								displayName: 'By ID',
+								name: 'id',
+								type: 'string',
+								hint: 'Enter platform-specific video ID',
+								placeholder: 'e.g. 7234567890123456789 (TikTok), CAbCdEfGhIj (Instagram), dQw4w9WgXcQ (YouTube)',
+							},
+							{
+								displayName: 'From List',
+								name: 'list',
+								type: 'list',
+								typeOptions: {
+									searchListMethod: 'allVideosSearch',
+									searchable: true,
+									searchFilterRequired: false,
+								},
+							},
+						],
 					},
 				],
 			},

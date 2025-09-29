@@ -164,11 +164,14 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Accounts',
+				displayName: 'Account Names or IDs',
 				name: 'accounts',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of account IDs',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				displayOptions: {
 					show: {
 						'/operation': ['getTopVideos', 'getInteractionMetrics', 'exportDailyGains'],
@@ -178,7 +181,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'accounts',
-						value: '={{$value.split(",").map(a => a.trim())}}',
 					},
 				},
 			},

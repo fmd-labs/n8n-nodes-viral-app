@@ -443,12 +443,62 @@ export const trackedAccountsFields: INodeProperties[] = [
 						description: 'Platform where the account is hosted',
 					},
 					{
-						displayName: 'Account ID',
+						displayName: 'Account',
 						name: 'accountId',
-						type: 'string',
-						default: '',
+						type: 'resourceLocator',
+						default: { mode: 'list', value: '' },
 						required: true,
-						description: 'Platform-specific account ID (not the organization account ID)',
+						description: 'The account to refresh data for',
+						modes: [
+							{
+								displayName: 'From List',
+								name: 'list',
+								type: 'list',
+								placeholder: 'Select an account...',
+								typeOptions: {
+									searchListMethod: 'accountSearchByPlatform',
+									searchable: true,
+									searchFilterRequired: false,
+								},
+								hint: 'Select from tracked accounts on the selected platform',
+							},
+							{
+								displayName: 'By ID',
+								name: 'id',
+								type: 'string',
+								placeholder: 'e.g. viral_creator',
+								hint: 'Enter the platform-specific account ID or username',
+								validation: [
+									{
+										type: 'regex',
+										properties: {
+											regex: '^[a-zA-Z0-9._-]+$',
+											errorMessage: 'Invalid account ID format. Use alphanumeric characters, dots, underscores, and hyphens only.',
+										},
+									},
+								],
+							},
+							{
+								displayName: 'By URL',
+								name: 'url',
+								type: 'string',
+								placeholder: 'e.g. https://www.tiktok.com/@viral_creator',
+								hint: 'Enter the full URL to the account profile',
+								validation: [
+									{
+										type: 'regex',
+										properties: {
+											regex: '^https?://',
+											errorMessage: 'URL must start with http:// or https://',
+										},
+									},
+								],
+								extractValue: {
+									type: 'regex',
+									regex: '(?:tiktok\\.com/@|instagram\\.com/|youtube\\.com/[@c]/)([^/?]+)',
+								},
+							},
+						],
 					},
 				],
 			},

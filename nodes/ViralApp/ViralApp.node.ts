@@ -38,6 +38,22 @@ export class ViralApp implements INodeType {
 				required: true,
 			},
 		],
+		hints: [
+			{
+				message: 'Large datasets may take time to process. Consider using filters to reduce response size.',
+				type: 'info',
+				location: 'outputPane',
+				whenToDisplay: 'beforeExecution',
+				displayCondition: '={{ $parameter["returnAll"] === true }}',
+			},
+			{
+				message: 'Export operations generate download URLs valid for 5 minutes.',
+				type: 'info',
+				location: 'outputPane',
+				whenToDisplay: 'afterExecution',
+				displayCondition: '={{ $parameter["operation"] === "export" }}',
+			},
+		],
 		properties: [
 			{
 				displayName: 'Resource',
@@ -128,6 +144,29 @@ export class ViralApp implements INodeType {
 				return response.data.map((project: IDataObject) => ({
 					name: project.name as string,
 					value: project.id as string,
+				}));
+			},
+
+			async getAccounts(this: ILoadOptionsFunctions) {
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/accounts',
+					{},
+					{ page: 1, perPage: 100 }, // Get up to 100 accounts for the dropdown
+				);
+
+				// Map platform values to display names
+				const platformDisplay: { [key: string]: string } = {
+					tiktok: 'TikTok',
+					instagram: 'Instagram',
+					youtube: 'YouTube',
+				};
+				
+				return response.data.map((account: IDataObject) => ({
+					name: `${account.username} (${platformDisplay[account.platform as string] || account.platform})`,
+					value: account.id as string,
+					description: `${account.followerCount || 0} followers`,
 				}));
 			},
 		},
@@ -247,6 +286,102 @@ export class ViralApp implements INodeType {
 					results: response.data.map((video: IDataObject) => ({
 						name: `${video.platformVideoId} (${platformDisplay[video.platform as string] || video.platform})`,
 						value: `${video.platform}:${video.platformVideoId}`,
+					})),
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
+
+			async accountSearchByPlatform(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+				paginationToken?: string,
+			): Promise<INodeListSearchResult> {
+				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+				const perPage = 20;
+				
+				// Get the platform from the current node parameters
+				const platform = this.getCurrentNodeParameter('platform') as string;
+				
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
+				
+				// Add platform filter if available
+				if (platform) {
+					query.platform = platform;
+				}
+				
+				// Add username search filter if provided
+				if (filter) {
+					query.username = filter;
+				}
+				
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/accounts',
+					{},
+					query,
+				);
+				
+				return {
+					results: response.data.map((account: IDataObject) => ({
+						name: account.username as string,
+						value: account.platformAccountId as string,
+						description: `Platform Account ID: ${account.platformAccountId}`,
+					})),
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
+
+			async allVideosSearch(
+				this: ILoadOptionsFunctions,
+				filter?: string,
+				paginationToken?: string,
+			): Promise<INodeListSearchResult> {
+				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+				const perPage = 20;
+				
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
+				
+				// Add search filter if provided
+				if (filter) {
+					query.filter = filter;
+				}
+				
+				// Get platform from current node parameters if available
+				try {
+					const platform = this.getCurrentNodeParameter('platform') as string;
+					if (platform) {
+						query.platform = platform;
+					}
+				} catch (error) {
+					// Platform parameter might not be available in all contexts, continue without it
+				}
+				
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/videos',
+					{},
+					query,
+				);
+				
+				const platformDisplay: { [key: string]: string } = {
+					tiktok: 'TikTok',
+					instagram: 'Instagram',
+					youtube: 'YouTube',
+				};
+				
+				return {
+					results: response.data.map((video: IDataObject) => ({
+						name: video.title ? `${video.title} (${platformDisplay[video.platform as string] || video.platform})` : `${video.platformVideoId} (${platformDisplay[video.platform as string] || video.platform})`,
+						value: video.platformVideoId as string,
+						description: video.title ? `Video ID: ${video.platformVideoId}` : undefined,
 					})),
 					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
 				};
@@ -649,6 +784,11 @@ export class ViralApp implements INodeType {
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
 						responseData = await viralAppApiRequest.call(
 							this, 'GET', '/analytics/interaction-metrics', {}, filters
+						);
+					} else if (operation === 'exportDailyGains') {
+						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						responseData = await viralAppApiRequest.call(
+							this, 'POST', '/analytics/video-daily-gains/export', filters
 						);
 					}
 				}
