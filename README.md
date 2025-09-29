@@ -137,6 +137,14 @@ pnpm lintfix
 
 ## Version History
 
+### 0.1.1
+- Fix ESLint compatibility by adding @typescript-eslint/utils dependency
+- Improve API request handling for POST requests
+- Enhance VideoAnalytics functionality with regex extraction for video IDs
+- Update parameter naming for better clarity (filters → activityFilters)
+- Remove outdated API documentation and routing information
+- Add @types/node dependency for better TypeScript support
+
 ### 0.1.0
 - Initial release
 - Support for all major ViralApp API endpoints
