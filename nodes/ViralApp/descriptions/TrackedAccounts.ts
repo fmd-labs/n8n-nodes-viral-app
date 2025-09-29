@@ -212,32 +212,16 @@ export const trackedAccountsFields: INodeProperties[] = [
 			{
 				displayName: 'Projects',
 				name: 'projects',
-				type: 'resourceLocator',
-				default: { mode: 'list', value: [] },
-				modes: [
-					{
-						displayName: 'From List',
-						name: 'list',
-						type: 'list',
-						placeholder: 'Select projects...',
-						typeOptions: {
-							searchListMethod: 'projectSearch',
-							searchable: true,
-						},
-					},
-					{
-						displayName: 'By IDs',
-						name: 'id',
-						type: 'string',
-						placeholder: 'Enter project IDs (comma-separated)',
-					},
-				],
-				description: 'Filter by projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description: 'Filter by projects (select multiple)',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'projects',
-						value: '={{typeof $value === "string" ? $value.split(",").map(p => p.trim()) : $value}}',
 					},
 				},
 			},

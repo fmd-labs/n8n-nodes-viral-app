@@ -115,6 +115,23 @@ export class ViralApp implements INodeType {
 	};
 
 	methods = {
+		loadOptions: {
+			async getProjects(this: ILoadOptionsFunctions) {
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/projects',
+					{},
+					{ page: 1, perPage: 100 }, // Get up to 100 projects for the dropdown
+				);
+				
+				return response.data.map((project: IDataObject) => ({
+					name: project.name as string,
+					value: project.id as string,
+				}));
+			},
+		},
+		
 		listSearch: {
 			async projectSearch(
 				this: ILoadOptionsFunctions,
