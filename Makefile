@@ -1,4 +1,4 @@
-.PHONY: clean build init-custom-dir link unlink restart all dev format lint lintfix watch
+.PHONY: clean build init-custom-dir link unlink start all dev dev-simple format lint lintfix watch
 
 # Variables
 PROJECT_PATH=$(shell pwd) # Assumes you run make from the project root
@@ -47,9 +47,9 @@ link: build init-custom-dir
 	@echo "   Linking $(PACKAGE_NAME) into $(N8N_CUSTOM_PATH)..."
 	@cd $(N8N_CUSTOM_PATH) && $(NVM_USE) && pnpm link --global $(PACKAGE_NAME)
 
-# Note: The --tunnel flag has been removed from restart due to ongoing localtunnel service issues
+# Note: The --tunnel flag has been removed from start due to ongoing localtunnel service issues
 # Use 'make tunnel-ngrok' for webhook testing or deploy to a cloud service
-restart:
+start:
 	@echo "🔄 Starting n8n locally (Debug Level)..."
 	@echo "🌐 n8n will be available at: http://localhost:5678"
 	@$(NVM_USE) && export N8N_LOG_LEVEL=debug && n8n start
@@ -70,17 +70,32 @@ watch:
 	@echo "👀 Watching for changes and rebuilding (tsc --watch)..."
 	@$(NVM_USE) && pnpm dev
 
-# Main command to run everything (clean build, link, restart)
-all: clean build unlink link restart
+# Main command to run everything (clean build, link, start)
+all: clean build unlink link start
 
-# Helper command for quick development cycle (build, relink, restart)
-dev: build unlink link restart
+# Main development command with hot reload (recommended)
+dev: init-custom-dir
+	@echo "🔥 Starting hot reload development mode..."
+	@echo "👀 TypeScript will compile automatically on changes"
+	@echo "🔄 n8n will hot reload your custom node changes"
+	@echo "🌐 n8n will be available at: http://localhost:5678"
+	@echo ""
+	@echo "💡 Initial build and link required first..."
+	@$(NVM_USE) && pnpm build
+	@$(NVM_USE) && pnpm link --global
+	@cd $(N8N_CUSTOM_PATH) && $(NVM_USE) && pnpm link --global $(PACKAGE_NAME)
+	@echo "🚀 Starting watch mode with hot reload..."
+	@$(NVM_USE) && pnpm run dev:hot
+
+# Simple development cycle without hot reload (fallback)
+dev-simple: build unlink link start
 
 # Run n8n locally without tunnel (recommended for development)
 local: build unlink link
 	@echo "🎮 Starting n8n locally (without tunnel)..."
 	@echo "🌐 Access n8n at: http://localhost:5678"
 	@$(NVM_USE) && n8n start
+
 
 # Run n8n with ngrok tunnel (requires ngrok to be installed)
 tunnel-ngrok: build unlink link

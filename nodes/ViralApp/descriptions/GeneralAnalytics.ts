@@ -98,13 +98,12 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				displayName: 'Date Range From',
 				name: 'dateRangeFrom',
 				type: 'dateTime',
-				default: '',
+				default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
 				description: 'Start date (YYYY-MM-DD)',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'dateRange[from]',
-						value: '={{$value.split("T")[0]}}',
 					},
 				},
 			},
@@ -112,13 +111,12 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				displayName: 'Date Range To',
 				name: 'dateRangeTo',
 				type: 'dateTime',
-				default: '',
+				default: '={{$today.toFormat("yyyy-MM-dd")}}',
 				description: 'End date (YYYY-MM-DD)',
 				routing: {
 					send: {
 						type: 'query',
 						property: 'dateRange[to]',
-						value: '={{$value.split("T")[0]}}',
 					},
 				},
 			},
