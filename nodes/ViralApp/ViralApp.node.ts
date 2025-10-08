@@ -515,13 +515,13 @@ export class ViralApp implements INodeType {
 						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
 						// Extract the account array from the fixedCollection structure
 						const accounts = accountsData.account as IDataObject[];
-						
+
 						// Build items array for API
 						const items = accounts.map(account => ({
 							platform: account.platform as string,
 							id: account.accountId as string
 						}));
-						
+
 						responseData = await viralAppApiRequest.call(
 							this, 'POST', '/accounts/tracked/refresh', { items }
 						);

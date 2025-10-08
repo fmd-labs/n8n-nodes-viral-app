@@ -137,6 +137,18 @@ pnpm lintfix
 
 ## Version History
 
+### 0.2.1
+- **Simplified parameter handling for tracked accounts and videos**
+- Replace resourceLocator with simple string fields:
+  * Tracked Accounts refresh: Now uses simple account ID input instead of complex resourceLocator
+  * Tracked Individual Videos add/refresh: Now uses simple video ID input instead of resourceLocator
+- Fix validation errors: "expected string, received object" issues resolved
+- Improve user experience with clearer field descriptions:
+  * Account ID: "Native platform account id"
+  * Video ID: "Platform-specific video ID"
+  * Platform: "Social media platform (tiktok, instagram, youtube)"
+- Streamline node usage by removing unnecessary UI complexity
+
 ### 0.2.0
 - **Major improvements to API parameter coverage and data simplification**
 - Add complete parameter coverage for all API endpoints:

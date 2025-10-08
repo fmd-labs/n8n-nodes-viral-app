@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-viral-app",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "n8n node for ViralApp API - Video analytics for TikTok, Instagram, and YouTube",
   "keywords": [
     "n8n-community-node-package",
