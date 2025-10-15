@@ -967,9 +967,15 @@ export class ViralApp implements INodeType {
 				
 				// Format response data for n8n
 				if (Array.isArray(responseData)) {
-					returnData.push(...responseData.map((item: IDataObject) => ({ json: item })));
+					returnData.push(...responseData.map((item: IDataObject) => ({
+						json: item,
+						pairedItem: { item: i },
+					})));
 				} else if (responseData) {
-					returnData.push({ json: responseData as IDataObject });
+					returnData.push({
+						json: responseData as IDataObject,
+						pairedItem: { item: i },
+					});
 				}
 				
 			} catch (error) {

@@ -137,6 +137,11 @@ pnpm lintfix
 
 ## Version History
 
+### 0.2.2
+- Remove package installation hooks to meet n8n Cloud security guidelines
+- Move internal tooling dependency to `devDependencies` to keep runtime footprint empty
+- Link node outputs to their originating inputs using `pairedItem` for improved workflow debugging
+
 ### 0.2.1
 - **Simplified parameter handling for tracked accounts and videos**
 - Replace resourceLocator with simple string fields:

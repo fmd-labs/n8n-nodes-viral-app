@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-viral-app",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "n8n node for ViralApp API - Video analytics for TikTok, Instagram, and YouTube",
   "keywords": [
     "n8n-community-node-package",
@@ -27,7 +27,6 @@
   "packageManager": "pnpm@9.1.4",
   "main": "index.js",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build": "tsc && gulp build:icons",
     "dev": "tsc --watch",
     "dev:hot": "concurrently \"tsc --watch\" \"N8N_DEV_RELOAD=true n8n start\"",
@@ -48,12 +47,11 @@
       "dist/nodes/ViralApp/ViralApp.node.js"
     ]
   },
-  "dependencies": {
-    "@typescript-eslint/utils": "^8.44.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^24.5.2",
     "@typescript-eslint/parser": "^7.15.0",
+    "@typescript-eslint/utils": "^8.44.1",
     "concurrently": "^9.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-n8n-nodes-base": "^1.16.1",
