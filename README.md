@@ -137,6 +137,10 @@ pnpm lintfix
 
 ## Version History
 
+### 0.2.3
+- Add an `Expand Related` option to **Video Analytics → Get Many**, enabling Stripe-style `expand=projects` responses for richer project data
+- Ensure Video Analytics requests pass `expand` arrays using standard query encoding
+
 ### 0.2.2
 - Remove package installation hooks to meet n8n Cloud security guidelines
 - Move internal tooling dependency to `devDependencies` to keep runtime footprint empty

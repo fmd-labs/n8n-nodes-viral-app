@@ -376,6 +376,27 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		],
 	},
 	{
+		displayName: 'Expand Related',
+		name: 'expand',
+		type: 'multiOptions',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getAll'],
+			},
+		},
+	options: [
+		{
+			name: 'Projects',
+			value: 'projects',
+			description: 'Return full project objects for the projects property instead of IDs',
+		},
+	],
+		default: [],
+		description: 'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
+		hint: 'Expanded responses include nested objects and increase payload size.',
+	},
+	{
 		displayName: 'Simplify',
 		name: 'simplify',
 		type: 'boolean',

@@ -564,18 +564,24 @@ export class ViralApp implements INodeType {
 					if (operation === 'getAll') {
 						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
+						const expand = this.getNodeParameter('expand', i, []) as string[];
 						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						
+						const baseQuery: IDataObject = { ...filters };
+
+						if (Array.isArray(expand) && expand.length > 0) {
+							baseQuery.expand = expand;
+						}
+
 						if (returnAll) {
 							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/videos', {}, filters
+								this, 'GET', '/videos', {}, baseQuery
 							);
 						} else {
 							const limit = this.getNodeParameter('limit', i) as number;
 							const page = 1; // Default page
 							const response = await viralAppApiRequest.call(
 								this, 'GET', '/videos', {}, 
-								{ ...filters, page, perPage: limit }
+								{ ...baseQuery, page, perPage: limit }
 							);
 							responseData = response.data;
 						}

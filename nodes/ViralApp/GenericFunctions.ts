@@ -59,7 +59,7 @@ export async function viralAppApiRequest(
 			'viralAppApi',
 			options,
 		);
-		
+
 		return response;
 	} catch (error) {
 		if (error.httpCode === '404') {
