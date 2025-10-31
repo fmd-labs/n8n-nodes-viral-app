@@ -16,73 +16,71 @@ export async function viralAppApiRequest(
 	this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions,
 	method: IHttpRequestMethods,
 	endpoint: string,
-	body: any = {},
+	body: IDataObject | undefined = {},
 	query: IDataObject = {},
 ): Promise<any> {
-	// Ensure body is always a valid object for POST requests, never undefined or null
-	if (method === 'POST') {
-		if (!body || (typeof body === 'object' && Object.keys(body).length === 0)) {
-			// Explicitly set an empty object that won't be stripped
-			body = {};
-		}
-	}
-	
+	const sanitizedQuery = cleanEmpty(query);
+	const sanitizedBody = body ? cleanEmpty(body) : {};
+
+	const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 	const options: IHttpRequestOptions = {
 		method,
-		url: `https://viral.app/api/v1${endpoint}`,
-		body,
-		qs: query,
+		url: `https://viral.app/api/v1${path}`,
+		qs: sanitizedQuery,
 		json: true,
 		headers: {},
 	};
 
-	// Remove body for GET requests only
-	if (method === 'GET') {
-		delete options.body;
-	}
-	
-	// For POST requests with empty body, ensure Content-Type is set and body is properly formatted
-	// This applies to all export endpoints that might receive empty filters
-	if (method === 'POST' && (endpoint === '/videos/export' || endpoint === '/accounts/export' || endpoint === '/analytics/video-daily-gains/export')) {
-		// Force set headers to ensure proper content type
-		(options.headers as IDataObject)['Content-Type'] = 'application/json';
-		// If body is empty, explicitly stringify it
-		if (Object.keys(body).length === 0) {
-			options.body = JSON.stringify({});
-			options.json = false; // Since we're manually stringifying
+	const methodUpper = method.toUpperCase();
+	const shouldSendBody = ['POST', 'PUT', 'PATCH'].includes(methodUpper);
+
+	if (shouldSendBody) {
+		options.body = Object.keys(sanitizedBody).length > 0 ? sanitizedBody : {};
+
+		if (
+			methodUpper === 'POST' &&
+			(path === '/videos/export' ||
+				path === '/accounts/export' ||
+				path === '/analytics/video-daily-gains/export')
+		) {
+			(options.headers as IDataObject)['Content-Type'] = 'application/json';
+
+			if (!options.body || Object.keys(options.body as IDataObject).length === 0) {
+				options.body = {};
+			}
 		}
 	}
 
 	try {
-		const response = await this.helpers.httpRequestWithAuthentication.call(
+		return await this.helpers.httpRequestWithAuthentication.call(
 			this,
 			'viralAppApi',
 			options,
 		);
-
-		return response;
 	} catch (error) {
-		if (error.httpCode === '404') {
+		const statusCode = (error as IDataObject).statusCode ?? (error as IDataObject).httpCode;
+
+		if (statusCode === 404) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Resource not found',
 				description: 'The requested resource could not be found. Please check the ID and try again.',
 			});
 		}
-		
-		if (error.httpCode === '401') {
+
+		if (statusCode === 401) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Authentication failed',
 				description: 'Please check your API key in the credentials.',
 			});
 		}
-		
-		if (error.httpCode === '429') {
+
+		if (statusCode === 429) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Rate limit exceeded',
 				description: 'Too many requests. Please wait a moment and try again.',
 			});
 		}
-		
+
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }
@@ -94,32 +92,74 @@ export async function viralAppApiRequestAllItems(
 	this: IExecuteFunctions,
 	method: IHttpRequestMethods,
 	endpoint: string,
-	body: any = {},
+	body: IDataObject | undefined = {},
 	query: IDataObject = {},
 ): Promise<IDataObject[]> {
-	const returnData: IDataObject[] = [];
-	let responseData;
+	const aggregated: IDataObject[] = [];
+	let currentPage = 1;
+	const baseQuery = { ...query };
 
-	// Set pagination parameters
-	query.page = 1;
-	query.perPage = 100; // Max items per page
+	while (true) {
+		const response = await viralAppApiRequest.call(
+			this,
+			method,
+			endpoint,
+			body,
+			{ ...baseQuery, page: currentPage, perPage: 100 },
+		);
 
-	do {
-		responseData = await viralAppApiRequest.call(this, method, endpoint, body, query);
+		const items = Array.isArray(response?.data) ? response.data : [];
+		aggregated.push(...items);
 
-		// Extract data array from response
-		if (responseData.data && Array.isArray(responseData.data)) {
-			returnData.push(...responseData.data);
+		const pageCount = response?.pageCount ?? 0;
+		if (!pageCount || currentPage >= pageCount) {
+			break;
+		}
+		currentPage += 1;
+	}
+
+	return aggregated;
+}
+
+export function cleanEmpty<T extends IDataObject>(input: T): T {
+	const output: IDataObject = {};
+
+	for (const [key, value] of Object.entries(input)) {
+		if (value === undefined || value === null) {
+			continue;
 		}
 
-		// Increment page for next request
-		query.page = (query.page as number) + 1;
+		if (typeof value === 'string') {
+			const trimmed = value.trim();
+			if (trimmed === '') {
+				continue;
+			}
+			output[key] = trimmed;
+			continue;
+		}
 
-		// Continue if there are more pages
-	} while (
-		responseData.pageCount &&
-		responseData.pageCount >= query.page
-	);
+		if (Array.isArray(value)) {
+			const cleanedArray = value
+				.map((entry) => (typeof entry === 'string' ? entry.trim() : entry))
+				.filter((entry) => entry !== undefined && entry !== null && entry !== '');
+			if (cleanedArray.length === 0) {
+				continue;
+			}
+			output[key] = cleanedArray;
+			continue;
+		}
 
-	return returnData;
+		if (typeof value === 'object') {
+			const cleanedObject = cleanEmpty(value as IDataObject);
+			if (Object.keys(cleanedObject).length === 0) {
+				continue;
+			}
+			output[key] = cleanedObject;
+			continue;
+		}
+
+		output[key] = value;
+	}
+
+	return output as T;
 }

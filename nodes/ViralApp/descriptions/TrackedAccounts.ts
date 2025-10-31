@@ -289,20 +289,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['trackedAccounts'],
-				operation: ['getAll'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
-	},
-
 	// ----------------------------------------
 	//        trackedAccounts: add
 	// ----------------------------------------

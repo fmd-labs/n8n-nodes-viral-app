@@ -6,9 +6,12 @@ import {
 	IDataObject,
 	ILoadOptionsFunctions,
 	INodeListSearchResult,
+	NodeOperationError,
+	VersionedNodeType,
 } from 'n8n-workflow';
 
-import { viralAppApiRequest, viralAppApiRequestAllItems } from './GenericFunctions';
+import { viralAppApiRequest } from './GenericFunctions';
+import { operationHandlers } from './operations';
 
 import { trackedAccountsOperations, trackedAccountsFields } from './descriptions/TrackedAccounts';
 import { trackedIndividualVideosOperations, trackedIndividualVideosFields } from './descriptions/TrackedIndividualVideos';
@@ -18,7 +21,8 @@ import { generalAnalyticsOperations, generalAnalyticsFields } from './descriptio
 import { projectsOperations, projectsFields } from './descriptions/Projects';
 import { integrationsOperations, integrationsFields } from './descriptions/Integrations';
 
-export class ViralApp implements INodeType {
+
+class ViralAppV1 implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ViralApp',
 		name: 'viralApp',
@@ -38,6 +42,10 @@ export class ViralApp implements INodeType {
 				required: true,
 			},
 		],
+		requestDefaults: {
+			baseURL: 'https://viral.app/api/v1',
+			json: true,
+		},
 		hints: [
 			{
 				message: 'Large datasets may take time to process. Consider using filters to reduce response size.',
@@ -98,6 +106,22 @@ export class ViralApp implements INodeType {
 					},
 				],
 				default: 'trackedAccounts',
+			},
+			{
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
+				options: [
+					{
+						displayName: 'Simplify Output',
+						name: 'simplifyOutput',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to return a simplified version of the response instead of the raw data',
+					},
+				],
 			},
 
 			// Tracked Accounts
@@ -290,715 +314,132 @@ export class ViralApp implements INodeType {
 					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
 				};
 			},
-
-			async accountSearchByPlatform(
-				this: ILoadOptionsFunctions,
-				filter?: string,
-				paginationToken?: string,
-			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 20;
-				
-				// Get the platform from the current node parameters
-				const platform = this.getCurrentNodeParameter('platform') as string;
-				
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-				
-				// Add platform filter if available
-				if (platform) {
-					query.platform = platform;
-				}
-				
-				// Add username search filter if provided
-				if (filter) {
-					query.username = filter;
-				}
-				
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/accounts',
-					{},
-					query,
-				);
-				
-				return {
-					results: response.data.map((account: IDataObject) => ({
-						name: account.username as string,
-						value: account.platformAccountId as string,
-						description: `Platform Account ID: ${account.platformAccountId}`,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
-			},
-
-			async allVideosSearch(
-				this: ILoadOptionsFunctions,
-				filter?: string,
-				paginationToken?: string,
-			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 20;
-				
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-				
-				// Add search filter if provided
-				if (filter) {
-					query.filter = filter;
-				}
-				
-				// Get platform from current node parameters if available
-				try {
-					const platform = this.getCurrentNodeParameter('platform') as string;
-					if (platform) {
-						query.platform = platform;
-					}
-				} catch (error) {
-					// Platform parameter might not be available in all contexts, continue without it
-				}
-				
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/videos',
-					{},
-					query,
-				);
-				
-				const platformDisplay: { [key: string]: string } = {
-					tiktok: 'TikTok',
-					instagram: 'Instagram',
-					youtube: 'YouTube',
-				};
-				
-				return {
-					results: response.data.map((video: IDataObject) => ({
-						name: video.title ? `${video.title} (${platformDisplay[video.platform as string] || video.platform})` : `${video.platformVideoId} (${platformDisplay[video.platform as string] || video.platform})`,
-						value: video.platformVideoId as string,
-						description: video.title ? `Video ID: ${video.platformVideoId}` : undefined,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
-			},
 		},
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
-		const length = items.length;
-		
-		for (let i = 0; i < length; i++) {
+
+		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				const resource = this.getNodeParameter('resource', i) as string;
-				const operation = this.getNodeParameter('operation', i) as string;
-				let responseData;
+				const resource = this.getNodeParameter('resource', itemIndex) as string;
+				const operation = this.getNodeParameter('operation', itemIndex) as string;
 
-				// ACCOUNT ANALYTICS
-				if (resource === 'accountAnalytics') {
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/accounts', {}, filters
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page since we removed manual page field
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/accounts', {}, 
-								{ ...filters, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-						
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								username: item.username,
-								platform: item.platform,
-								followerCount: item.followerCount,
-								totalVideos: item.totalVideos,
-								totalViews: item.totalViews,
-								avgViews: item.avgViews,
-								engagementRate: item.engagementRate,
-								viralityRate: item.viralityRate,
-								createdAt: item.createdAt
-							}));
-						}
-					} else if (operation === 'export') {
-						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/accounts/export', exportBody
-						);
-					}
-				}
-				
-				// TRACKED ACCOUNTS
-				else if (resource === 'trackedAccounts') {
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/accounts/tracked', {}, filters
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/accounts/tracked', {}, 
-								{ ...filters, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-						
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								username: item.username,
-								platform: item.platform,
-								status: item.status,
-								maxVideos: item.maxVideos,
-								lastSyncedAt: item.lastSyncedAt,
-								createdAt: item.createdAt,
-								videoCount: item.videoCount
-							}));
-						}
-					} else if (operation === 'add') {
-						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
-						// Extract the account array from the fixedCollection structure
-						const accounts = accountsData.account as IDataObject[];
-						
-						// Process hashtags if they exist (convert comma-separated string to array)
-						const processedAccounts = accounts.map(acc => {
-							const account: IDataObject = {
-								platform: acc.platform,
-								username: acc.username,
-								max_videos: acc.max_videos
-							};
-							
-							// Handle hashtags filter if provided
-							if (acc.hashtagsFilter && typeof acc.hashtagsFilter === 'string') {
-								const hashtagsStr = acc.hashtagsFilter as string;
-								if (hashtagsStr.trim()) {
-									account.hashtagsFilter = hashtagsStr.split(',').map(h => h.trim()).filter(h => h);
-								}
-							}
-							
-							return account;
-						});
-						
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/accounts/tracked', { accounts: processedAccounts }
-						);
-					} else if (operation === 'getCount') {
-						const count = await viralAppApiRequest.call(
-							this, 'GET', '/accounts/tracked/count'
-						);
-						// Wrap the count number in an object for n8n
-						responseData = { count };
-					} else if (operation === 'refresh') {
-						const accountsData = this.getNodeParameter('accounts', i) as IDataObject;
-						// Extract the account array from the fixedCollection structure
-						const accounts = accountsData.account as IDataObject[];
-
-						// Build items array for API
-						const items = accounts.map(account => ({
-							platform: account.platform as string,
-							id: account.accountId as string
-						}));
-
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/accounts/tracked/refresh', { items }
-						);
-					} else if (operation === 'updateMaxVideos') {
-						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
-						const maxVideos = this.getNodeParameter('maxVideos', i) as number;
-						responseData = await viralAppApiRequest.call(
-							this, 'PUT', `/accounts/tracked/${accountId}/max-videos`, { newMaxVideos: maxVideos }
-						);
-					} else if (operation === 'updateHashtags') {
-						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
-						const hashtagsInput = this.getNodeParameter('hashtags', i) as string;
-						// Convert comma-separated string to array and trim whitespace
-						const hashtags = hashtagsInput ? hashtagsInput.split(',').map(h => h.trim()).filter(h => h) : [];
-						responseData = await viralAppApiRequest.call(
-							this, 'PUT', `/accounts/tracked/${accountId}/hashtags`, { hashtagsFilter: hashtags }
-						);
-					} else if (operation === 'updateProjectHashtags') {
-						const accountId = this.getNodeParameter('accountId', i, undefined, { extractValue: true }) as string;
-						const projectId = this.getNodeParameter('projectId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						const hashtagsInput = this.getNodeParameter('projectHashtags', i) as string;
-						// Convert comma-separated string to array and trim whitespace
-						const hashtags = hashtagsInput ? hashtagsInput.split(',').map(h => h.trim()).filter(h => h) : [];
-						responseData = await viralAppApiRequest.call(
-							this, 'PUT', `/accounts/tracked/${accountId}/project-hashtags`, 
-							{ 
-								projectHashtags: [{
-									projectId,
-									hashtagsFilter: hashtags
-								}]
-							}
-						);
-					}
-				}
-				
-				// VIDEO ANALYTICS
-				else if (resource === 'videoAnalytics') {
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const expand = this.getNodeParameter('expand', i, []) as string[];
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						const baseQuery: IDataObject = { ...filters };
-
-						if (Array.isArray(expand) && expand.length > 0) {
-							baseQuery.expand = expand;
-						}
-
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/videos', {}, baseQuery
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/videos', {}, 
-								{ ...baseQuery, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-						
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								platformVideoId: item.platformVideoId,
-								platform: item.platform,
-								title: item.title,
-								viewCount: item.viewCount,
-								likeCount: item.likeCount,
-								commentCount: item.commentCount,
-								shareCount: item.shareCount,
-								engagementRate: item.engagementRate,
-								publishedAt: item.publishedAt
-							}));
-						}
-					} else if (operation === 'get') {
-						const platform = this.getNodeParameter('platform', i) as string;
-						const platformVideoId = this.getNodeParameter('platformVideoId', i, undefined, { extractValue: true }) as string;
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', `/videos/${platform}/${platformVideoId}`
-						);
-					} else if (operation === 'getHistory') {
-						const platform = this.getNodeParameter('platform', i) as string;
-						const platformVideoId = this.getNodeParameter('platformVideoId', i, undefined, { extractValue: true }) as string;
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', `/videos/${platform}/${platformVideoId}/history`
-						);
-					} else if (operation === 'getActivity') {
-						const filters = this.getNodeParameter('activityFilters', i, {}) as IDataObject;
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/videos/activity', {}, filters
-						);
-					} else if (operation === 'export') {
-						const exportBody = this.getNodeParameter('exportBody', i, {}) as IDataObject;
-						
-						// Build clean request body, handling the nested dateRange structure
-						const requestBody: IDataObject = {};
-						
-						// Add simple string/array fields if they have values
-						if (exportBody.accountUsername) {
-							requestBody.accountUsername = exportBody.accountUsername;
-						}
-						if (exportBody.platforms && (exportBody.platforms as string[]).length > 0) {
-							requestBody.platforms = exportBody.platforms;
-						}
-						if (exportBody.accounts && (exportBody.accounts as string[]).length > 0) {
-							requestBody.accounts = exportBody.accounts;
-						}
-						if (exportBody.contentTypes && (exportBody.contentTypes as string[]).length > 0) {
-							requestBody.contentTypes = exportBody.contentTypes;
-						}
-						if (exportBody.projects && (exportBody.projects as string[]).length > 0) {
-							requestBody.projects = exportBody.projects;
-						}
-						
-						// Handle the nested dateRange from fixedCollection
-						if (exportBody.dateRange && typeof exportBody.dateRange === 'object') {
-							const dateRangeData = exportBody.dateRange as IDataObject;
-							if (dateRangeData.range && Array.isArray(dateRangeData.range) && dateRangeData.range.length > 0) {
-								const range = dateRangeData.range[0] as IDataObject;
-								if (range.from && range.to) {
-									// Extract date part from datetime strings
-									const fromDate = (range.from as string).split('T')[0];
-									const toDate = (range.to as string).split('T')[0];
-									requestBody.dateRange = {
-										from: fromDate,
-										to: toDate
-									};
-								}
-							}
-						}
-						
-						// Add optional sorting parameters if provided
-						if (exportBody.sortCol) {
-							requestBody.sortCol = exportBody.sortCol;
-						}
-						if (exportBody.sortDir) {
-							requestBody.sortDir = exportBody.sortDir;
-						}
-						
-						// Make the API request with the clean body
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/videos/export', requestBody
-						);
-					}
-				}
-				
-				// TRACKED INDIVIDUAL VIDEOS
-				else if (resource === 'trackedIndividualVideos') {
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/videos/tracked', {}, filters
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/videos/tracked', {}, 
-								{ ...filters, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-						
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								platformVideoId: item.platformVideoId,
-								platform: item.platform,
-								status: item.status,
-								lastSyncedAt: item.lastSyncedAt,
-								createdAt: item.createdAt,
-								viewCount: item.viewCount,
-								engagementRate: item.engagementRate
-							}));
-						}
-					} else if (operation === 'add') {
-						const videosData = this.getNodeParameter('videos', i) as IDataObject;
-						// Extract the video array from the fixedCollection structure
-						const videos = videosData.video as IDataObject[];
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/videos/tracked', { videos }
-						);
-					} else if (operation === 'refresh') {
-						const videosData = this.getNodeParameter('videos', i) as IDataObject;
-						// Extract the video array from the fixedCollection structure
-						const videos = videosData.video as IDataObject[];
-						
-						// Build items array for API
-						const items = videos.map(video => ({
-							platform: video.platform as string,
-							id: video.videoId as string
-						}));
-						
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/videos/tracked/refresh', { items }
-						);
-					}
-				}
-				
-				// PROJECTS
-				else if (resource === 'projects') {
-					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/projects', {}, filters
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/projects', {},
-								{ ...filters, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								name: item.name,
-								description: item.description,
-								logo: item.logo,
-								trackedAccountsCount: Array.isArray(item.trackedAccounts) ? item.trackedAccounts.length : 0,
-								createdAt: item.createdAt
-							}));
-						}
-					} else if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/projects', { name, ...additionalFields }
-						);
-					} else if (operation === 'update') {
-						const projectId = this.getNodeParameter('projectId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
-						responseData = await viralAppApiRequest.call(
-							this, 'PUT', `/projects/${projectId}`, updateFields
-						);
-					} else if (operation === 'delete') {
-						const projectId = this.getNodeParameter('projectId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						await viralAppApiRequest.call(
-							this, 'DELETE', `/projects/${projectId}`
-						);
-						// Return standardized delete response
-						responseData = { deleted: true };
-					} else if (operation === 'addAccount') {
-						const projectId = this.getNodeParameter('projectId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						const accountId = this.getNodeParameter('accountId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', `/projects/${projectId}/accounts/${accountId}`
-						);
-					} else if (operation === 'removeAccount') {
-						const projectId = this.getNodeParameter('projectId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						const accountId = this.getNodeParameter('accountId', i, undefined, {
-							extractValue: true,
-						}) as string;
-						responseData = await viralAppApiRequest.call(
-							this, 'DELETE', `/projects/${projectId}/accounts/${accountId}`
-						);
-					}
-				}
-				
-				// INTEGRATIONS
-				else if (resource === 'integrations') {
-					if (operation === 'getApps') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-
-						if (returnAll) {
-							responseData = await viralAppApiRequestAllItems.call(
-								this, 'GET', '/apps', {}, filters
-							);
-						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
-							const page = 1; // Default page
-							const response = await viralAppApiRequest.call(
-								this, 'GET', '/apps', {},
-								{ ...filters, page, perPage: limit }
-							);
-							responseData = response.data;
-						}
-
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								title: item.title,
-								provider: item.provider,
-								lastSeenAt: item.lastSeenAt,
-								nextSyncAt: item.nextSyncAt,
-								createdAt: item.createdAt
-							}));
-						}
-					}
-				}
-				
-				// GENERAL ANALYTICS
-				else if (resource === 'generalAnalytics') {
-					if (operation === 'getTopVideos') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
-						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						// Extract just the date part (YYYY-MM-DD) from the datetime string
-						const queryParams = {
-							...filters,
-							'dateRange[from]': dateRangeFrom.split('T')[0],
-							'dateRange[to]': dateRangeTo.split('T')[0],
-						};
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/top-videos', {}, queryParams
-						);
-
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								platform: item.platform,
-								accountUsername: item.accountUsername,
-								caption: item.caption,
-								viewCount: item.viewCount,
-								likeCount: item.likeCount,
-								engagementRate: item.engagementRate,
-								publishedAt: item.publishedAt
-							}));
-						}
-					} else if (operation === 'getTopAccounts') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
-						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						// Extract just the date part (YYYY-MM-DD) from the datetime string
-						const queryParams = {
-							...filters,
-							'dateRange[from]': dateRangeFrom.split('T')[0],
-							'dateRange[to]': dateRangeTo.split('T')[0],
-						};
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/top-accounts', {}, queryParams
-						);
-
-						// Apply simplify if requested
-						if (simplify && Array.isArray(responseData)) {
-							responseData = responseData.map((item: IDataObject) => ({
-								id: item.id,
-								platform: item.platform,
-								username: item.username,
-								followerCount: item.followerCount,
-								totalVideos: item.totalVideos,
-								totalViews: item.totalViews,
-								engagementRate: item.engagementRate
-							}));
-						}
-					} else if (operation === 'getKpis') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
-						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						// Extract just the date part (YYYY-MM-DD) from the datetime string
-						const queryParams = {
-							...filters,
-							'dateRange[from]': dateRangeFrom.split('T')[0],
-							'dateRange[to]': dateRangeTo.split('T')[0],
-						};
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/kpis', {}, queryParams
-						);
-
-						// Apply simplify if requested (KPIs are usually single objects)
-						if (simplify && responseData) {
-							responseData = {
-								videoCount: responseData.videoCount,
-								viewCount: responseData.viewCount,
-								likeCount: responseData.likeCount,
-								commentCount: responseData.commentCount,
-								shareCount: responseData.shareCount,
-								engagementRate: responseData.engagementRate
-							};
-						}
-					} else if (operation === 'getInteractionMetrics') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
-						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
-						const simplify = this.getNodeParameter('simplify', i, false) as boolean;
-						// Extract just the date part (YYYY-MM-DD) from the datetime string
-						const queryParams = {
-							...filters,
-							'dateRange[from]': dateRangeFrom.split('T')[0],
-							'dateRange[to]': dateRangeTo.split('T')[0],
-						};
-						responseData = await viralAppApiRequest.call(
-							this, 'GET', '/analytics/interaction-metrics', {}, queryParams
-						);
-
-						// Apply simplify if requested (response has dailyMetrics array)
-						if (simplify && responseData && responseData.dailyMetrics) {
-							responseData = responseData.dailyMetrics.map((item: IDataObject) => ({
-								date: item.date,
-								views: item.views,
-								likes: item.likes,
-								comments: item.comments,
-								shares: item.shares,
-								bookmarks: item.bookmarks
-							}));
-						}
-					} else if (operation === 'exportDailyGains') {
-						const filters = this.getNodeParameter('filters', i, {}) as IDataObject;
-						const dateRangeFrom = this.getNodeParameter('dateRangeFrom', i) as string;
-						const dateRangeTo = this.getNodeParameter('dateRangeTo', i) as string;
-						// Extract just the date part (YYYY-MM-DD) from the datetime string
-						const body = {
-							...filters,
-							dateRange: {
-								from: dateRangeFrom.split('T')[0],
-								to: dateRangeTo.split('T')[0],
-							},
-						};
-						responseData = await viralAppApiRequest.call(
-							this, 'POST', '/analytics/video-daily-gains/export', body
-						);
-					}
-				}
-				
-				// Format response data for n8n
-				if (Array.isArray(responseData)) {
-					returnData.push(...responseData.map((item: IDataObject) => ({
-						json: item,
-						pairedItem: { item: i },
-					})));
-				} else if (responseData) {
-					returnData.push({
-						json: responseData as IDataObject,
-						pairedItem: { item: i },
+				const resourceHandlers = operationHandlers[resource];
+				if (!resourceHandlers) {
+					throw new NodeOperationError(this.getNode(), `Unsupported resource "${resource}".`, {
+						description: 'Review the node documentation for supported resources.',
 					});
 				}
-				
+
+				const handler = resourceHandlers[operation];
+				if (!handler) {
+					throw new NodeOperationError(this.getNode(), `Unsupported operation "${operation}" for resource "${resource}".`);
+				}
+
+				const result = await handler.call(this, itemIndex);
+				const normalized = normalizeResult(result);
+
+				if (normalized.length === 0) {
+					returnData.push({
+						json: { success: true },
+						pairedItem: { item: itemIndex },
+					});
+					continue;
+				}
+
+				for (const entry of normalized) {
+					if (!entry.pairedItem) {
+						entry.pairedItem = { item: itemIndex };
+					}
+					returnData.push(entry);
+				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ 
-						json: { 
-							error: error.message,
-							resource: this.getNodeParameter('resource', i),
-							operation: this.getNodeParameter('operation', i),
-						} 
+					returnData.push({
+						json: {
+							error: (error as Error).message,
+							resource: this.getNodeParameter('resource', itemIndex, ''),
+							operation: this.getNodeParameter('operation', itemIndex, ''),
+						},
+						pairedItem: { item: itemIndex },
 					});
 					continue;
 				}
 				throw error;
 			}
 		}
-		
+
 		return [returnData];
 	}
+
+}
+
+export class ViralApp extends VersionedNodeType {
+	constructor() {
+		const node = new ViralAppV1();
+		super(
+			{
+				1: node,
+			},
+			node.description,
+		);
+	}
+}
+
+function normalizeEntry(entry: unknown): IDataObject {
+	if (typeof entry === 'object' && entry !== null) {
+		return entry as IDataObject;
+	}
+
+	if (typeof entry === 'string' || typeof entry === 'number' || typeof entry === 'boolean') {
+		return { value: entry };
+	}
+
+	if (entry === null || entry === undefined) {
+		return { value: entry ?? null };
+	}
+
+	return { value: JSON.stringify(entry) };
+}
+
+function isExecutionData(entry: unknown): entry is INodeExecutionData {
+	return typeof entry === 'object' && entry !== null && ('json' in (entry as IDataObject) || 'binary' in (entry as IDataObject));
+}
+
+function normalizeResult(result: unknown): INodeExecutionData[] {
+	if (result === undefined || result === null) {
+		return [];
+	}
+
+	if (Array.isArray(result)) {
+		if (result.every(isExecutionData)) {
+			return (result as INodeExecutionData[]).map((entry) => ({
+				json: entry.json ?? {},
+				binary: entry.binary,
+				pairedItem: entry.pairedItem,
+			}));
+		}
+
+		return (result as unknown[]).map((entry) => ({
+			json: normalizeEntry(entry),
+		}));
+	}
+
+	if (isExecutionData(result)) {
+		return [
+			{
+				json: result.json ?? {},
+				binary: result.binary,
+				pairedItem: result.pairedItem,
+			},
+		];
+	}
+
+	return [
+		{
+			json: normalizeEntry(result),
+		},
+	];
 }

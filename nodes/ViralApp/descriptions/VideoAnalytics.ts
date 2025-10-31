@@ -140,10 +140,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					searchListMethod: 'videoSearch',
 					searchable: true,
 				},
-				extractValue: {
-					type: 'regex',
-					regex: '^[^:]+:(.+)$',
-				},
 			},
 			{
 				displayName: 'By ID',
@@ -396,20 +392,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		description: 'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
 		hint: 'Expanded responses include nested objects and increase payload size.',
 	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['videoAnalytics'],
-				operation: ['getAll'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
-	},
-
 	// ----------------------------------------
 	//      videoAnalytics: getActivity
 	// ----------------------------------------
