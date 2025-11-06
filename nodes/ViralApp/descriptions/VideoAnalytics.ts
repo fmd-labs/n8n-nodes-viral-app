@@ -120,14 +120,17 @@ export const videoAnalyticsFields: INodeProperties[] = [
 	},
 	{
 		displayName: 'Video',
-		name: 'platformVideoId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['videoAnalytics'],
-				operation: ['get', 'getHistory'],
+	name: 'platformVideoId',
+	type: 'resourceLocator',
+	default: { mode: 'list', value: '' },
+	required: true,
+	typeOptions: {
+		loadOptionsDependsOn: ['platform'],
+	},
+	displayOptions: {
+		show: {
+			resource: ['videoAnalytics'],
+			operation: ['get', 'getHistory'],
 			},
 		},
 		modes: [
@@ -139,10 +142,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				typeOptions: {
 					searchListMethod: 'videoSearch',
 					searchable: true,
-				},
-				extractValue: {
-					type: 'regex',
-					regex: '^[^:]+:(.+)$',
 				},
 			},
 			{
@@ -330,12 +329,44 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
+						name: 'Account Username',
+						value: 'accountUsername',
+					},
+					{
+						name: 'Bookmark Count',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count',
+						value: 'commentCount',
+					},
+					{
+						name: 'Duration Seconds',
+						value: 'durationSeconds',
+					},
+					{
 						name: 'Engagement Rate',
 						value: 'engagementRate',
 					},
 					{
+						name: 'Like Count',
+						value: 'likeCount',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
 						name: 'Published At',
 						value: 'publishedAt',
+					},
+					{
+						name: 'Share Count',
+						value: 'shareCount',
 					},
 					{
 						name: 'View Count',
@@ -385,8 +416,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				operation: ['getAll'],
 			},
 		},
-	options: [
-		{
+		options: [
+			{
 			name: 'Projects',
 			value: 'projects',
 			description: 'Return full project objects for the projects property instead of IDs',
@@ -396,20 +427,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		description: 'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
 		hint: 'Expanded responses include nested objects and increase payload size.',
 	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['videoAnalytics'],
-				operation: ['getAll'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
-	},
-
 	// ----------------------------------------
 	//      videoAnalytics: getActivity
 	// ----------------------------------------
@@ -607,7 +624,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 							},
 						],
 					},
-				],
+			],
 			},
 			{
 				displayName: 'Sort Column',
@@ -615,12 +632,44 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
+						name: 'Account Username',
+						value: 'accountUsername',
+					},
+					{
+						name: 'Bookmark Count',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count',
+						value: 'commentCount',
+					},
+					{
+						name: 'Duration Seconds',
+						value: 'durationSeconds',
+					},
+					{
 						name: 'Engagement Rate',
 						value: 'engagementRate',
 					},
 					{
+						name: 'Like Count',
+						value: 'likeCount',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
 						name: 'Published At',
 						value: 'publishedAt',
+					},
+					{
+						name: 'Share Count',
+						value: 'shareCount',
 					},
 					{
 						name: 'View Count',

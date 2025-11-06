@@ -91,7 +91,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['generalAnalytics'],
-				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
+				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
 			},
 		},
 		// Routing removed - handled in execute function
@@ -106,42 +106,12 @@ export const generalAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['generalAnalytics'],
-				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics'],
+				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
 			},
 		},
 		// Routing removed - handled in execute function
 	},
 	// Date fields for Export Daily Gains (POST request with body)
-	{
-		displayName: 'Date Range From',
-		name: 'dateRangeFrom',
-		type: 'dateTime',
-		required: true,
-		default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
-		description: 'Start date (YYYY-MM-DD)',
-		displayOptions: {
-			show: {
-				resource: ['generalAnalytics'],
-				operation: ['exportDailyGains'],
-			},
-		},
-		// Routing removed - handled in execute function
-	},
-	{
-		displayName: 'Date Range To',
-		name: 'dateRangeTo',
-		type: 'dateTime',
-		required: true,
-		default: '={{$today.toFormat("yyyy-MM-dd")}}',
-		description: 'End date (YYYY-MM-DD)',
-		displayOptions: {
-			show: {
-				resource: ['generalAnalytics'],
-				operation: ['exportDailyGains'],
-			},
-		},
-		// Routing removed - handled in execute function
-	},
 	// ----------------------------------------
 	//      Optional Filters
 	// ----------------------------------------
@@ -445,18 +415,5 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 			},
 		],
-	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['generalAnalytics'],
-				operation: ['getTopVideos', 'getTopAccounts', 'getKpis', 'getInteractionMetrics'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
 	},
 ];

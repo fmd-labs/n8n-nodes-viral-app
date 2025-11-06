@@ -246,23 +246,55 @@ export const accountAnalyticsFields: INodeProperties[] = [
 						value: 'followerCount',
 					},
 					{
-						name: 'Published At',
-						value: 'publishedAt',
+						name: 'Highest Views',
+						value: 'highestViews',
+					},
+					{
+						name: 'Last Post Date',
+						value: 'lastPostDate',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
+						name: 'Total Bookmarks',
+						value: 'totalBookmarks',
+					},
+					{
+						name: 'Total Comments',
+						value: 'totalComments',
+					},
+					{
+						name: 'Total Likes',
+						value: 'totalLikes',
+					},
+					{
+						name: 'Total Shares',
+						value: 'totalShares',
+					},
+					{
+						name: 'Total Videos',
+						value: 'totalVideos',
 					},
 					{
 						name: 'Total Views',
 						value: 'totalViews',
 					},
 					{
-						name: 'View Count',
-						value: 'viewCount',
+						name: 'Username',
+						value: 'username',
 					},
 					{
 						name: 'Virality Rate',
 						value: 'viralityRate',
 					},
 				],
-				default: 'publishedAt',
+				default: 'username',
 				description: 'Column to sort by',
 				routing: {
 					send: {
@@ -295,20 +327,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['accountAnalytics'],
-				operation: ['getAll'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
-	},
-
 	// ----------------------------------------
 	//      accountAnalytics: export
 	// ----------------------------------------

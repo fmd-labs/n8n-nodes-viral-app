@@ -168,23 +168,35 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Published At',
-						value: 'publishedAt',
+						name: 'Added By',
+						value: 'addedBy',
 					},
 					{
-						name: 'View Count',
-						value: 'viewCount',
+						name: 'Analytics Load At',
+						value: 'analyticsLoadAt',
 					},
 					{
-						name: 'Engagement Rate',
-						value: 'engagementRate',
+						name: 'Last Error Code',
+						value: 'lastErrorCode',
 					},
 					{
-						name: 'Created At',
-						value: 'createdAt',
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
+						name: 'Platform Video ID',
+						value: 'platformVideoId',
+					},
+					{
+						name: 'Tracking Since',
+						value: 'trackingSince',
+					},
+					{
+						name: 'Username',
+						value: 'username',
 					},
 				],
-				default: 'publishedAt',
+				default: 'platform',
 				description: 'Column to sort by',
 				routing: {
 					send: {
@@ -217,20 +229,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['trackedIndividualVideos'],
-				operation: ['getAll'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
-	},
-
 	// ----------------------------------------
 	//   trackedIndividualVideos: add
 	// ----------------------------------------

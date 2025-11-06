@@ -104,23 +104,23 @@ export const integrationsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Created At',
-						value: 'createdAt',
+						name: 'Title',
+						value: 'title',
 					},
 					{
-						name: 'Name',
-						value: 'name',
+						name: 'SKU',
+						value: 'sku',
 					},
 					{
-						name: 'Provider',
-						value: 'provider',
+						name: 'Analytics Latest Load At',
+						value: 'analyticsLatestLoadAt',
 					},
 					{
-						name: 'Updated At',
-						value: 'updatedAt',
+						name: 'Next Sync At',
+						value: 'nextSyncAt',
 					},
 				],
-				default: 'createdAt',
+				default: 'title',
 				description: 'Column to sort by',
 				routing: {
 					send: {
@@ -152,18 +152,5 @@ export const integrationsFields: INodeProperties[] = [
 				},
 			},
 		],
-	},
-	{
-		displayName: 'Simplify',
-		name: 'simplify',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['integrations'],
-				operation: ['getApps'],
-			},
-		},
-		default: false,
-		description: 'Whether to return a simplified version of the response instead of the raw data',
 	},
 ];
