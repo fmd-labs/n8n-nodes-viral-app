@@ -141,6 +141,27 @@ class ViralAppV1 implements INodeType {
 				type: 'collection',
 				placeholder: 'Add Option',
 				default: {},
+				displayOptions: {
+					show: {
+						resource: [
+							'accountAnalytics',
+							'trackedAccounts',
+							'trackedIndividualVideos',
+							'projects',
+							'integrations',
+							'videoAnalytics',
+							'generalAnalytics',
+						],
+						operation: [
+							'getAll',
+							'getApps',
+							'getKpis',
+							'getTopVideos',
+							'getTopAccounts',
+							'getInteractionMetrics',
+						],
+					},
+				},
 				options: [
 					{
 						displayName: 'Simplify Output',
