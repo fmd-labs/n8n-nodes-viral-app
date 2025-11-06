@@ -29,6 +29,7 @@ export async function viralAppApiRequest(
 		qs: sanitizedQuery,
 		json: true,
 		headers: {},
+		arrayFormat: 'repeat',
 	};
 
 	const methodUpper = method.toUpperCase();
