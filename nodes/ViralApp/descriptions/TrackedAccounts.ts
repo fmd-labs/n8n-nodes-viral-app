@@ -347,13 +347,17 @@ export const trackedAccountsFields: INodeProperties[] = [
 								name: '10',
 								value: 10,
 							},
-							{
-								name: '30',
-								value: 30,
-							},
-							{
-								name: '100',
-								value: 100,
+					{
+						name: '30',
+						value: 30,
+					},
+					{
+						name: '60',
+						value: 60,
+					},
+					{
+						name: '100',
+						value: 100,
 							},
 							{
 								name: '300',
@@ -503,13 +507,17 @@ export const trackedAccountsFields: INodeProperties[] = [
 				name: '10',
 				value: 10,
 			},
-			{
-				name: '30',
-				value: 30,
-			},
-			{
-				name: '100',
-				value: 100,
+		{
+			name: '30',
+			value: 30,
+		},
+		{
+			name: '60',
+			value: 60,
+		},
+		{
+			name: '100',
+			value: 100,
 			},
 			{
 				name: '300',
