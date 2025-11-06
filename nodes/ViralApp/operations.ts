@@ -55,6 +55,8 @@ export const operationHandlers: Record<string, HandlerMap> = {
 	},
 };
 
+const DEFAULT_EXPORT_LOOKBACK_DAYS = 14;
+
 function ensureArray<T>(value: unknown): T[] {
 	if (Array.isArray(value)) {
 		return value as T[];
@@ -67,6 +69,24 @@ function toDateOnly(value: unknown): string | undefined {
 		return undefined;
 	}
 	return value.split('T')[0];
+}
+
+function formatDateOnly(date: Date): string {
+	const year = date.getFullYear();
+	const month = `${date.getMonth() + 1}`.padStart(2, '0');
+	const day = `${date.getDate()}`.padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
+
+function getDefaultExportDateRange(): IDataObject {
+	const end = new Date();
+	const start = new Date(end);
+	start.setDate(end.getDate() - DEFAULT_EXPORT_LOOKBACK_DAYS);
+
+	return {
+		from: formatDateOnly(start),
+		to: formatDateOnly(end),
+	};
 }
 
 function extractFixedDateRange(collection: IDataObject | undefined): IDataObject | undefined {
@@ -370,6 +390,10 @@ async function accountAnalyticsExport(this: IExecuteFunctions, itemIndex: number
 		if (range) {
 			payload.dateRange = range;
 		}
+	}
+
+	if (!payload.dateRange) {
+		payload.dateRange = getDefaultExportDateRange();
 	}
 
 	const response = (await viralAppApiRequest.call(
@@ -760,6 +784,10 @@ async function videoAnalyticsExport(this: IExecuteFunctions, itemIndex: number) 
 		if (range) {
 			payload.dateRange = range;
 		}
+	}
+
+	if (!payload.dateRange) {
+		payload.dateRange = getDefaultExportDateRange();
 	}
 
 	if (exportBody.sortCol) {

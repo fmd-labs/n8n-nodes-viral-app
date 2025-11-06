@@ -107,23 +107,6 @@ class ViralAppV1 implements INodeType {
 				],
 				default: 'trackedAccounts',
 			},
-			{
-				displayName: 'Options',
-				name: 'options',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				options: [
-					{
-						displayName: 'Simplify Output',
-						name: 'simplifyOutput',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to return a simplified version of the response instead of the raw data',
-					},
-				],
-			},
-
 			// Tracked Accounts
 			...trackedAccountsOperations,
 			...trackedAccountsFields,
@@ -151,6 +134,23 @@ class ViralAppV1 implements INodeType {
 			// Integrations
 			...integrationsOperations,
 			...integrationsFields,
+
+			{
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
+				options: [
+					{
+						displayName: 'Simplify Output',
+						name: 'simplifyOutput',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to return a simplified version of the response instead of the raw data',
+					},
+				],
+			},
 		],
 	};
 
