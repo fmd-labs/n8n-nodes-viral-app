@@ -110,7 +110,7 @@ export const projectsFields: INodeProperties[] = [
 				routing: {
 					send: {
 						type: 'query',
-						property: 'name',
+						property: 'search',
 					},
 				},
 			},

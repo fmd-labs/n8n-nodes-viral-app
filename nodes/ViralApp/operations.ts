@@ -590,7 +590,7 @@ async function projectsGetAll(this: IExecuteFunctions, itemIndex: number) {
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
 	const query: IDataObject = cleanEmpty({
-		name: filters.name,
+		search: filters.name,
 	});
 
 	let items: IDataObject[];
