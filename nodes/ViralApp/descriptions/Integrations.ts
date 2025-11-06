@@ -104,23 +104,23 @@ export const integrationsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Created At',
-						value: 'createdAt',
+						name: 'Title',
+						value: 'title',
 					},
 					{
-						name: 'Name',
-						value: 'name',
+						name: 'SKU',
+						value: 'sku',
 					},
 					{
-						name: 'Provider',
-						value: 'provider',
+						name: 'Analytics Latest Load At',
+						value: 'analyticsLatestLoadAt',
 					},
 					{
-						name: 'Updated At',
-						value: 'updatedAt',
+						name: 'Next Sync At',
+						value: 'nextSyncAt',
 					},
 				],
-				default: 'createdAt',
+				default: 'title',
 				description: 'Column to sort by',
 				routing: {
 					send: {

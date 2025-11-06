@@ -231,6 +231,26 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
+						name: 'Added By',
+						value: 'addedBy',
+					},
+					{
+						name: 'Analytics Latest Load At',
+						value: 'analyticsLatestLoadAt',
+					},
+					{
+						name: 'Hashtags Filter',
+						value: 'hashtagsFilter',
+					},
+					{
+						name: 'Individual Videos',
+						value: 'individualVideos',
+					},
+					{
+						name: 'Last Error Code',
+						value: 'lastErrorCode',
+					},
+					{
 						name: 'Max Videos',
 						value: 'maxVideos',
 					},
@@ -241,6 +261,10 @@ export const trackedAccountsFields: INodeProperties[] = [
 					{
 						name: 'Project Count',
 						value: 'projects',
+					},
+					{
+						name: 'Tracking Since',
+						value: 'trackingSince',
 					},
 					{
 						name: 'Username',

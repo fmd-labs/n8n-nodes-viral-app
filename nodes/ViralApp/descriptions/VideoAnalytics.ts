@@ -329,12 +329,44 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
+						name: 'Account Username',
+						value: 'accountUsername',
+					},
+					{
+						name: 'Bookmark Count',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count',
+						value: 'commentCount',
+					},
+					{
+						name: 'Duration Seconds',
+						value: 'durationSeconds',
+					},
+					{
 						name: 'Engagement Rate',
 						value: 'engagementRate',
 					},
 					{
+						name: 'Like Count',
+						value: 'likeCount',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
 						name: 'Published At',
 						value: 'publishedAt',
+					},
+					{
+						name: 'Share Count',
+						value: 'shareCount',
 					},
 					{
 						name: 'View Count',
@@ -384,8 +416,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				operation: ['getAll'],
 			},
 		},
-	options: [
-		{
+		options: [
+			{
 			name: 'Projects',
 			value: 'projects',
 			description: 'Return full project objects for the projects property instead of IDs',
@@ -592,7 +624,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 							},
 						],
 					},
-				],
+			],
 			},
 			{
 				displayName: 'Sort Column',
@@ -600,12 +632,44 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
+						name: 'Account Username',
+						value: 'accountUsername',
+					},
+					{
+						name: 'Bookmark Count',
+						value: 'bookmarkCount',
+					},
+					{
+						name: 'Comment Count',
+						value: 'commentCount',
+					},
+					{
+						name: 'Duration Seconds',
+						value: 'durationSeconds',
+					},
+					{
 						name: 'Engagement Rate',
 						value: 'engagementRate',
 					},
 					{
+						name: 'Like Count',
+						value: 'likeCount',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
 						name: 'Published At',
 						value: 'publishedAt',
+					},
+					{
+						name: 'Share Count',
+						value: 'shareCount',
 					},
 					{
 						name: 'View Count',
