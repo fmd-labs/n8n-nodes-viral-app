@@ -137,6 +137,10 @@ pnpm lintfix
 
 ## Version History
 
+### 0.2.4
+- Align all ViralApp node sort options with the ViralApp dashboard by adding the latest sortable columns for tracked videos, accounts, integrations, and analytics exports
+- Verified the release with `pnpm build` and `pnpm lint`
+
 ### 0.2.3
 - Add an `Expand Related` option to **Video Analytics → Get Many**, enabling Stripe-style `expand=projects` responses for richer project data
 - Ensure Video Analytics requests pass `expand` arrays using standard query encoding
