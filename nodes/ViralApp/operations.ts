@@ -386,9 +386,11 @@ async function trackedAccountsGetAll(this: IExecuteFunctions, itemIndex: number)
 	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
+	const usernameFilter = filters.username as string | undefined;
 
 	const query: IDataObject = cleanEmpty({
-		username: filters.username,
+		username: usernameFilter,
+		search: usernameFilter,
 		platforms: filters.platforms,
 		projects: filters.projects,
 		sortCol: filters.sortCol,
