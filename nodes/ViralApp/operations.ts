@@ -458,11 +458,6 @@ async function trackedAccountsAdd(this: IExecuteFunctions, itemIndex: number) {
 			max_videos: raw.max_videos,
 		};
 
-		const hashtags = parseHashtags(raw.hashtagsFilter);
-		if (hashtags) {
-			payload.hashtagsFilter = hashtags;
-		}
-
 		return cleanEmpty(payload);
 	});
 
@@ -512,15 +507,42 @@ async function trackedAccountsUpdateHashtags(this: IExecuteFunctions, itemIndex:
 
 async function trackedAccountsUpdateProjectHashtags(this: IExecuteFunctions, itemIndex: number) {
 	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
-	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, { extractValue: true }) as string;
-	const hashtags = parseHashtags(this.getNodeParameter('projectHashtags', itemIndex));
+	const entries = this.getNodeParameter('projectHashtags.projectHashtag', itemIndex, []) as IDataObject[];
+
+	if (!Array.isArray(entries) || entries.length === 0) {
+		throw new NodeOperationError(this.getNode(), 'Provide at least one project hashtag entry.');
+	}
+
+	const projectHashtags = entries.map((entry, index) => {
+		const rawProject = entry.projectId;
+		let projectId: string | undefined;
+
+		if (typeof rawProject === 'string') {
+			projectId = rawProject;
+		} else if (rawProject && typeof rawProject === 'object') {
+			const candidate = (rawProject as IDataObject).value ?? (rawProject as IDataObject).id ?? (rawProject as IDataObject).name;
+			if (typeof candidate === 'string') {
+				projectId = candidate;
+			}
+		}
+
+		if (!projectId) {
+			throw new NodeOperationError(
+				this.getNode(),
+				`Project is required for entry #${index + 1}.`,
+			);
+		}
+
+		const hashtags = parseHashtags(entry.hashtags);
+
+		return {
+			projectId,
+			hashtagsFilter: hashtags ?? [],
+		};
+	});
+
 	return viralAppApiRequest.call(this, 'PUT', `/accounts/tracked/${accountId}/project-hashtags`, {
-		projectHashtags: [
-			{
-				projectId,
-				hashtagsFilter: hashtags ?? [],
-			},
-		],
+		projectHashtags,
 	});
 }
 

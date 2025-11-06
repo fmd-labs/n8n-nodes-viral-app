@@ -371,14 +371,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 						default: 100,
 						description: 'Maximum number of videos to track',
 					},
-					{
-						displayName: 'Hashtags Filter',
-						name: 'hashtagsFilter',
-						type: 'string',
-						default: '',
-						placeholder: 'e.g. brand,marketing,viral',
-						description: 'Comma-separated list of hashtags to filter content',
-					},
 				],
 			},
 		],
@@ -563,59 +555,75 @@ export const trackedAccountsFields: INodeProperties[] = [
 	// ----------------------------------------
 	// trackedAccounts: updateProjectHashtags
 	// ----------------------------------------
-	{
-		displayName: 'Project',
-		name: 'projectId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['trackedAccounts'],
-				operation: ['updateProjectHashtags'],
-			},
+{
+	displayName: 'Project Hashtags',
+	name: 'projectHashtags',
+	type: 'fixedCollection',
+	typeOptions: {
+		multipleValues: true,
+	},
+	default: {},
+	required: true,
+	placeholder: 'Add Project Hashtag',
+	displayOptions: {
+		show: {
+			resource: ['trackedAccounts'],
+			operation: ['updateProjectHashtags'],
 		},
-		modes: [
-			{
-				displayName: 'From List',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select a project...',
-				typeOptions: {
-					searchListMethod: 'projectSearch',
-					searchable: true,
-				},
-			},
-			{
-				displayName: 'By ID',
-				name: 'id',
-				type: 'string',
-				placeholder: 'Enter project ID',
-				validation: [
-					{
+	},
+	options: [
+		{
+			displayName: 'Project Hashtag',
+			name: 'projectHashtag',
+			values: [
+				{
+					displayName: 'Project',
+					name: 'projectId',
+					type: 'resourceLocator',
+					default: { mode: 'list', value: '' },
+					required: true,
+					extractValue: {
 						type: 'regex',
-						properties: {
-							regex: '^[a-zA-Z0-9-_]+$',
-							errorMessage: 'Not a valid project ID',
-						},
+						regex: '^[a-zA-Z0-9-_]+$',
 					},
-				],
-			},
-		],
-		description: 'The project to update hashtags for',
-	},
-	{
-		displayName: 'Hashtags',
-		name: 'projectHashtags',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['trackedAccounts'],
-				operation: ['updateProjectHashtags'],
-			},
+					modes: [
+						{
+							displayName: 'From List',
+							name: 'list',
+							type: 'list',
+							placeholder: 'Select a project...',
+							typeOptions: {
+								searchListMethod: 'projectSearch',
+								searchable: true,
+							},
+						},
+						{
+							displayName: 'By ID',
+							name: 'id',
+							type: 'string',
+							placeholder: 'Enter project ID',
+							validation: [
+								{
+									type: 'regex',
+									properties: {
+										regex: '^[a-zA-Z0-9-_]+$',
+										errorMessage: 'Not a valid project ID',
+									},
+								},
+							],
+						},
+					],
+				},
+				{
+					displayName: 'Hashtags Filter',
+					name: 'hashtags',
+					type: 'string',
+					default: '',
+					description: 'Comma-separated list of hashtags for the project',
+				},
+			],
 		},
-		default: '',
-		description: 'Comma-separated list of hashtags for the project',
-	},
+	],
+},
 
 ];
