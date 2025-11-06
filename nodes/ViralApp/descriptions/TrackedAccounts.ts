@@ -231,14 +231,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'options',
 				options: [
 					{
-						name: 'Created At',
-						value: 'createdAt',
-					},
-					{
-						name: 'Follower Count',
-						value: 'followerCount',
-					},
-					{
 						name: 'Max Videos',
 						value: 'maxVideos',
 					},
@@ -247,15 +239,15 @@ export const trackedAccountsFields: INodeProperties[] = [
 						value: 'platform',
 					},
 					{
-						name: 'Updated At',
-						value: 'updatedAt',
+						name: 'Project Count',
+						value: 'projects',
 					},
 					{
 						name: 'Username',
 						value: 'username',
 					},
 				],
-				default: 'createdAt',
+				default: 'username',
 				description: 'Column to sort by',
 				routing: {
 					send: {
