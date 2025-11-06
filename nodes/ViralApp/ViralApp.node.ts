@@ -283,39 +283,48 @@ class ViralAppV1 implements INodeType {
 				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
 				const perPage = 20;
 				
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-				
-				if (filter) {
-					query.search = filter;
-				}
-				
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/videos/tracked',
-					{},
-					query,
-				);
-				
-				const platformDisplay: { [key: string]: string } = {
-					tiktok: 'TikTok',
-					instagram: 'Instagram',
-					youtube: 'YouTube',
-				};
-				
-				return {
-					results: response.data.map((video: IDataObject) => ({
-						name: `${video.platformVideoId} (${platformDisplay[video.platform as string] || video.platform})`,
-						value: `${video.platform}:${video.platformVideoId}`,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
-			},
+			const query: IDataObject = {
+				page,
+				perPage,
+			};
+
+			const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
+			if (typeof selectedPlatform === 'string' && selectedPlatform.trim().length > 0) {
+				query.platforms = [selectedPlatform.trim().toLowerCase()];
+			}
+
+			if (filter) {
+				query.search = filter;
+			}
+
+			const response = await viralAppApiRequest.call(
+				this,
+				'GET',
+				'/videos/tracked',
+				{},
+				query,
+			);
+
+			const results = (Array.isArray(response.data) ? response.data : [])
+				.map((video: IDataObject) => {
+					const videoId = getVideoId(video);
+					if (!videoId) {
+						return null;
+					}
+					return {
+						name: buildVideoDisplayName(video, videoId),
+						value: videoId,
+					};
+				})
+				.filter((entry: { name: string; value: string } | null): entry is { name: string; value: string } => entry !== null);
+
+			return {
+				results,
+				paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+			};
 		},
-	};
+	},
+};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
@@ -386,6 +395,29 @@ export class ViralApp extends VersionedNodeType {
 			node.description,
 		);
 	}
+}
+
+function getVideoId(video: IDataObject): string | undefined {
+	const rawId = video.platformVideoId;
+
+	if (typeof rawId === 'string') {
+		const trimmed = rawId.trim();
+		return trimmed.length > 0 ? trimmed : undefined;
+	}
+
+	if (typeof rawId === 'number') {
+		return rawId.toString();
+	}
+
+	return undefined;
+}
+
+function buildVideoDisplayName(video: IDataObject, videoId: string): string {
+	const title = typeof video.title === 'string' ? video.title.trim() : '';
+	const account = typeof video.accountUsername === 'string' ? video.accountUsername.trim() : '';
+
+	const primary = title ? `${title} (${videoId})` : videoId;
+	return account ? `${primary} · ${account}` : primary;
 }
 
 function normalizeEntry(entry: unknown): IDataObject {

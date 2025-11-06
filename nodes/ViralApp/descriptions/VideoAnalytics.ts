@@ -120,14 +120,17 @@ export const videoAnalyticsFields: INodeProperties[] = [
 	},
 	{
 		displayName: 'Video',
-		name: 'platformVideoId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['videoAnalytics'],
-				operation: ['get', 'getHistory'],
+	name: 'platformVideoId',
+	type: 'resourceLocator',
+	default: { mode: 'list', value: '' },
+	required: true,
+	typeOptions: {
+		loadOptionsDependsOn: ['platform'],
+	},
+	displayOptions: {
+		show: {
+			resource: ['videoAnalytics'],
+			operation: ['get', 'getHistory'],
 			},
 		},
 		modes: [
