@@ -181,8 +181,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description:
-					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -198,8 +197,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description:
-					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 				displayOptions: {
 					show: {
 						'/operation': [

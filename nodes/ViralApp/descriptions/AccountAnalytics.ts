@@ -108,23 +108,10 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				operation: ['getAll'],
 			},
 		},
-		options: [
-			{
-				displayName: 'Search',
-				name: 'search',
-				type: 'string',
-				default: '',
-				description: 'Search by account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
-			},
-			{
-				displayName: 'Platforms',
-				name: 'platforms',
+	options: [
+		{
+			displayName: 'Platforms',
+			name: 'platforms',
 				type: 'multiOptions',
 				options: [
 					{
@@ -148,41 +135,54 @@ export const accountAnalyticsFields: INodeProperties[] = [
 						property: 'platforms',
 					},
 				},
+		},
+		{
+			displayName: 'Account Names or IDs',
+			name: 'accounts',
+			type: 'multiOptions',
+			typeOptions: {
+				loadOptionsMethod: 'getAccounts',
 			},
-			{
-				displayName: 'Account Names or IDs',
-				name: 'accounts',
-				type: 'multiOptions',
-				typeOptions: {
-					loadOptionsMethod: 'getAccounts',
-				},
-				default: [],
-				description:
-					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'accounts',
-					},
-				},
-			},
-			{
-				displayName: 'Project Names or IDs',
-				name: 'projects',
-				type: 'multiOptions',
-				typeOptions: {
-					loadOptionsMethod: 'getProjects',
-				},
-				default: [],
-				description:
-					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'projects',
-					},
+			default: [],
+			description:
+				'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			routing: {
+				send: {
+					type: 'query',
+					property: 'accounts',
 				},
 			},
+		},
+		{
+			displayName: 'Project Names or IDs',
+			name: 'projects',
+			type: 'multiOptions',
+			typeOptions: {
+				loadOptionsMethod: 'getProjects',
+			},
+			default: [],
+			description:
+				'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			routing: {
+				send: {
+					type: 'query',
+					property: 'projects',
+				},
+			},
+		},
+		{
+			displayName: 'Search',
+			name: 'search',
+			type: 'string',
+			default: '',
+			description: 'Search by account username',
+			routing: {
+				send: {
+					type: 'query',
+					property: 'search',
+				},
+			},
+		},
 			{
 				displayName: 'Date Range From',
 				name: 'dateRangeFrom',
@@ -384,8 +384,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description:
-					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -395,8 +394,7 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description:
-					'Filter by specific projects. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description: 'Filter by specific projects. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Content Types',
