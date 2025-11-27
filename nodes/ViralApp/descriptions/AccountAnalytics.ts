@@ -108,226 +108,226 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				operation: ['getAll'],
 			},
 		},
-	options: [
-		{
-			displayName: 'Account Names or IDs',
-			name: 'accounts',
-			type: 'multiOptions',
-			typeOptions: {
-				loadOptionsMethod: 'getAccounts',
-			},
-			default: [],
-			description:
-				'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'accounts',
+		options: [
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'accounts',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Content Types',
-			name: 'contentTypes',
-			type: 'multiOptions',
-			options: [
-				{
-					name: 'Video',
-					value: 'video',
-				},
-				{
-					name: 'Slideshow',
-					value: 'slideshow',
-				},
-			],
-			default: [],
-			description: 'Filter by content types',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'contentTypes',
-				},
-			},
-		},
-		{
-			displayName: 'Date Range From',
-			name: 'dateRangeFrom',
-			type: 'dateTime',
-			default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
-			description: 'Start date for analytics data (YYYY-MM-DD)',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'dateRange[from]',
-					value: '={{$value.split("T")[0]}}',
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'contentTypes',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Date Range To',
-			name: 'dateRangeTo',
-			type: 'dateTime',
-			default: '={{$today.toFormat("yyyy-MM-dd")}}',
-			description: 'End date for analytics data (YYYY-MM-DD)',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'dateRange[to]',
-					value: '={{$value.split("T")[0]}}',
+			{
+				displayName: 'Date Range From',
+				name: 'dateRangeFrom',
+				type: 'dateTime',
+				default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
+				description: 'Start date for analytics data (YYYY-MM-DD)',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'dateRange[from]',
+						value: '={{$value.split("T")[0]}}',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Platforms',
-			name: 'platforms',
-			type: 'multiOptions',
-			options: [
-				{
-					name: 'Instagram',
-					value: 'instagram',
-				},
-				{
-					name: 'TikTok',
-					value: 'tiktok',
-				},
-				{
-					name: 'YouTube',
-					value: 'youtube',
-				},
-			],
-			default: [],
-			description: 'Filter by social media platforms',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'platforms',
+			{
+				displayName: 'Date Range To',
+				name: 'dateRangeTo',
+				type: 'dateTime',
+				default: '={{$today.toFormat("yyyy-MM-dd")}}',
+				description: 'End date for analytics data (YYYY-MM-DD)',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'dateRange[to]',
+						value: '={{$value.split("T")[0]}}',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Project Names or IDs',
-			name: 'projects',
-			type: 'multiOptions',
-			typeOptions: {
-				loadOptionsMethod: 'getProjects',
-			},
-			default: [],
-			description:
-				'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'projects',
+			{
+				displayName: 'Platforms',
+				name: 'platforms',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Instagram',
+						value: 'instagram',
+					},
+					{
+						name: 'TikTok',
+						value: 'tiktok',
+					},
+					{
+						name: 'YouTube',
+						value: 'youtube',
+					},
+				],
+				default: [],
+				description: 'Filter by social media platforms',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'platforms',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Search',
-			name: 'search',
-			type: 'string',
-			default: '',
-			description: 'Search by account username',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'search',
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'projects',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Sort Column',
-			name: 'sortCol',
-			type: 'options',
-			options: [
-				{
-					name: 'Engagement Rate',
-					value: 'engagementRate',
-				},
-				{
-					name: 'Follower Count',
-					value: 'followerCount',
-				},
-				{
-					name: 'Highest Views',
-					value: 'highestViews',
-				},
-				{
-					name: 'Last Post Date',
-					value: 'lastPostDate',
-				},
-				{
-					name: 'Load At',
-					value: 'loadAt',
-				},
-				{
-					name: 'Platform',
-					value: 'platform',
-				},
-				{
-					name: 'Total Bookmarks',
-					value: 'totalBookmarks',
-				},
-				{
-					name: 'Total Comments',
-					value: 'totalComments',
-				},
-				{
-					name: 'Total Likes',
-					value: 'totalLikes',
-				},
-				{
-					name: 'Total Shares',
-					value: 'totalShares',
-				},
-				{
-					name: 'Total Videos',
-					value: 'totalVideos',
-				},
-				{
-					name: 'Total Views',
-					value: 'totalViews',
-				},
-				{
-					name: 'Username',
-					value: 'username',
-				},
-				{
-					name: 'Virality Rate',
-					value: 'viralityRate',
-				},
-			],
-			default: 'username',
-			description: 'Column to sort by',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'sortCol',
+			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search by account username',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'search',
+					},
 				},
 			},
-		},
-		{
-			displayName: 'Sort Direction',
-			name: 'sortDir',
-			type: 'options',
-			options: [
-				{
-					name: 'Ascending',
-					value: 'asc',
-				},
-				{
-					name: 'Descending',
-					value: 'desc',
-				},
-			],
-			default: 'desc',
-			routing: {
-				send: {
-					type: 'query',
-					property: 'sortDir',
+			{
+				displayName: 'Sort Column',
+				name: 'sortCol',
+				type: 'options',
+				options: [
+					{
+						name: 'Engagement Rate',
+						value: 'engagementRate',
+					},
+					{
+						name: 'Follower Count',
+						value: 'followerCount',
+					},
+					{
+						name: 'Highest Views',
+						value: 'highestViews',
+					},
+					{
+						name: 'Last Post Date',
+						value: 'lastPostDate',
+					},
+					{
+						name: 'Load At',
+						value: 'loadAt',
+					},
+					{
+						name: 'Platform',
+						value: 'platform',
+					},
+					{
+						name: 'Total Bookmarks',
+						value: 'totalBookmarks',
+					},
+					{
+						name: 'Total Comments',
+						value: 'totalComments',
+					},
+					{
+						name: 'Total Likes',
+						value: 'totalLikes',
+					},
+					{
+						name: 'Total Shares',
+						value: 'totalShares',
+					},
+					{
+						name: 'Total Videos',
+						value: 'totalVideos',
+					},
+					{
+						name: 'Total Views',
+						value: 'totalViews',
+					},
+					{
+						name: 'Username',
+						value: 'username',
+					},
+					{
+						name: 'Virality Rate',
+						value: 'viralityRate',
+					},
+				],
+				default: 'username',
+				description: 'Column to sort by',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortCol',
+					},
 				},
 			},
-		},
-	],
+			{
+				displayName: 'Sort Direction',
+				name: 'sortDir',
+				type: 'options',
+				options: [
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+				default: 'desc',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortDir',
+					},
+				},
+			},
+		],
 	},
 	// ----------------------------------------
 	//      accountAnalytics: export
@@ -347,103 +347,105 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				filters: [''],
 			},
 		},
-	options: [
-		{
-			displayName: 'Account Names or IDs',
-			name: 'accounts',
-			type: 'multiOptions',
-			typeOptions: {
-				loadOptionsMethod: 'getAccounts',
+		options: [
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
-			default: [],
-			description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-		},
-		{
-			displayName: 'Content Types',
-			name: 'contentTypes',
-			type: 'multiOptions',
-			options: [
-				{
-					name: 'Video',
-					value: 'video',
-				},
-				{
-					name: 'Slideshow',
-					value: 'slideshow',
-				},
-			],
-			default: [],
-			description: 'Filter by content types',
-		},
-		{
-			displayName: 'Date Range',
-			name: 'dateRange',
-			type: 'fixedCollection',
-			default: {},
-			options: [
-				{
-					displayName: 'Date Range',
-					name: 'range',
-					values: [
-						{
-							displayName: 'From',
-							name: 'from',
-							type: 'dateTime',
-							default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
-							required: true,
-							description: 'Start date (YYYY-MM-DD)',
-						},
-						{
-							displayName: 'To',
-							name: 'to',
-							type: 'dateTime',
-							default: '={{$today.toFormat("yyyy-MM-dd")}}',
-							required: true,
-							description: 'End date (YYYY-MM-DD)',
-						},
-					],
-				},
-			],
-		},
-		{
-			displayName: 'Platforms',
-			name: 'platforms',
-			type: 'multiOptions',
-			options: [
-				{
-					name: 'Instagram',
-					value: 'instagram',
-				},
-				{
-					name: 'TikTok',
-					value: 'tiktok',
-				},
-				{
-					name: 'YouTube',
-					value: 'youtube',
-				},
-			],
-			default: [],
-			description: 'Filter by social media platforms',
-		},
-		{
-			displayName: 'Project Names or IDs',
-			name: 'projects',
-			type: 'multiOptions',
-			typeOptions: {
-				loadOptionsMethod: 'getProjects',
+			{
+				displayName: 'Content Types',
+				name: 'contentTypes',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Video',
+						value: 'video',
+					},
+					{
+						name: 'Slideshow',
+						value: 'slideshow',
+					},
+				],
+				default: [],
+				description: 'Filter by content types',
 			},
-			default: [],
-			description: 'Filter by specific projects. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-		},
-		{
-			displayName: 'Search',
-			name: 'search',
-			type: 'string',
-			default: '',
-			description: 'Search by account username',
-		},
-	],
+			{
+				displayName: 'Date Range',
+				name: 'dateRange',
+				type: 'fixedCollection',
+				default: {},
+				options: [
+					{
+						displayName: 'Date Range',
+						name: 'range',
+						values: [
+							{
+								displayName: 'From',
+								name: 'from',
+								type: 'dateTime',
+								default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
+								required: true,
+								description: 'Start date (YYYY-MM-DD)',
+							},
+							{
+								displayName: 'To',
+								name: 'to',
+								type: 'dateTime',
+								default: '={{$today.toFormat("yyyy-MM-dd")}}',
+								required: true,
+								description: 'End date (YYYY-MM-DD)',
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'Platforms',
+				name: 'platforms',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Instagram',
+						value: 'instagram',
+					},
+					{
+						name: 'TikTok',
+						value: 'tiktok',
+					},
+					{
+						name: 'YouTube',
+						value: 'youtube',
+					},
+				],
+				default: [],
+				description: 'Filter by social media platforms',
+			},
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getProjects',
+				},
+				default: [],
+				description:
+					'Filter by specific projects. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search by account username',
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',

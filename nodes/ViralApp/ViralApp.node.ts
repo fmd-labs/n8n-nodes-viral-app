@@ -243,13 +243,7 @@ class ViralAppV1 implements INodeType {
 					});
 
 				const query: IDataObject = { page: 1, perPage: 50 };
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/videos/excluded',
-					{},
-					query,
-				);
+				const response = await viralAppApiRequest.call(this, 'GET', '/videos/excluded', {}, query);
 
 				if (Array.isArray(response?.data)) {
 					return mapResults(response.data as IDataObject[]);
