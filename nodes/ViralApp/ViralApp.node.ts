@@ -14,13 +14,21 @@ import { viralAppApiRequest } from './GenericFunctions';
 import { operationHandlers } from './operations';
 
 import { trackedAccountsOperations, trackedAccountsFields } from './descriptions/TrackedAccounts';
-import { trackedIndividualVideosOperations, trackedIndividualVideosFields } from './descriptions/TrackedIndividualVideos';
-import { accountAnalyticsOperations, accountAnalyticsFields } from './descriptions/AccountAnalytics';
+import {
+	trackedIndividualVideosOperations,
+	trackedIndividualVideosFields,
+} from './descriptions/TrackedIndividualVideos';
+import {
+	accountAnalyticsOperations,
+	accountAnalyticsFields,
+} from './descriptions/AccountAnalytics';
 import { videoAnalyticsOperations, videoAnalyticsFields } from './descriptions/VideoAnalytics';
-import { generalAnalyticsOperations, generalAnalyticsFields } from './descriptions/GeneralAnalytics';
+import {
+	generalAnalyticsOperations,
+	generalAnalyticsFields,
+} from './descriptions/GeneralAnalytics';
 import { projectsOperations, projectsFields } from './descriptions/Projects';
 import { integrationsOperations, integrationsFields } from './descriptions/Integrations';
-
 
 class ViralAppV1 implements INodeType {
 	description: INodeTypeDescription = {
@@ -43,12 +51,13 @@ class ViralAppV1 implements INodeType {
 			},
 		],
 		requestDefaults: {
-			baseURL: 'https://viral.app/api/v1',
+			baseURL: (process.env.VIRALAPP_BASE_URL || 'https://viral.app/api/v1').replace(/\/$/, ''),
 			json: true,
 		},
 		hints: [
 			{
-				message: 'Large datasets may take time to process. Consider using filters to reduce response size.',
+				message:
+					'Large datasets may take time to process. Consider using filters to reduce response size.',
 				type: 'info',
 				location: 'outputPane',
 				whenToDisplay: 'beforeExecution',
@@ -168,7 +177,8 @@ class ViralAppV1 implements INodeType {
 						name: 'simplifyOutput',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to return a simplified version of the response instead of the raw data',
+						description:
+							'Whether to return a simplified version of the response instead of the raw data',
 					},
 				],
 			},
@@ -185,7 +195,7 @@ class ViralAppV1 implements INodeType {
 					{},
 					{ page: 1, perPage: 100 }, // Get up to 100 projects for the dropdown
 				);
-				
+
 				return response.data.map((project: IDataObject) => ({
 					name: project.name as string,
 					value: project.id as string,
@@ -207,7 +217,7 @@ class ViralAppV1 implements INodeType {
 					instagram: 'Instagram',
 					youtube: 'YouTube',
 				};
-				
+
 				return response.data.map((account: IDataObject) => ({
 					name: `${account.username} (${platformDisplay[account.platform as string] || account.platform})`,
 					value: account.id as string,
@@ -215,7 +225,7 @@ class ViralAppV1 implements INodeType {
 				}));
 			},
 		},
-		
+
 		listSearch: {
 			async projectSearch(
 				this: ILoadOptionsFunctions,
@@ -224,25 +234,19 @@ class ViralAppV1 implements INodeType {
 			): Promise<INodeListSearchResult> {
 				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
 				const perPage = 20; // Reasonable page size for search
-				
+
 				const query: IDataObject = {
 					page,
 					perPage,
 				};
-				
+
 				// Add search filter if provided
 				if (filter) {
 					query.name = filter;
 				}
-				
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/projects',
-					{},
-					query,
-				);
-				
+
+				const response = await viralAppApiRequest.call(this, 'GET', '/projects', {}, query);
+
 				return {
 					results: response.data.map((project: IDataObject) => ({
 						name: project.name as string,
@@ -253,7 +257,7 @@ class ViralAppV1 implements INodeType {
 					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
 				};
 			},
-			
+
 			async trackedAccountSearch(
 				this: ILoadOptionsFunctions,
 				filter?: string,
@@ -261,32 +265,26 @@ class ViralAppV1 implements INodeType {
 			): Promise<INodeListSearchResult> {
 				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
 				const perPage = 20; // Reasonable page size for search
-				
+
 				const query: IDataObject = {
 					page,
 					perPage,
 				};
-				
+
 				// Add username filter if provided
 				if (filter) {
 					query.username = filter;
 				}
-				
-				const response = await viralAppApiRequest.call(
-					this,
-					'GET',
-					'/accounts/tracked',
-					{},
-					query,
-				);
-				
+
+				const response = await viralAppApiRequest.call(this, 'GET', '/accounts/tracked', {}, query);
+
 				// Map platform values to display names
 				const platformDisplay: { [key: string]: string } = {
 					tiktok: 'TikTok',
 					instagram: 'Instagram',
 					youtube: 'YouTube',
 				};
-				
+
 				return {
 					results: response.data.map((account: IDataObject) => ({
 						name: `${account.username} (${platformDisplay[account.platform as string] || account.platform})`,
@@ -303,49 +301,52 @@ class ViralAppV1 implements INodeType {
 			): Promise<INodeListSearchResult> {
 				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
 				const perPage = 20;
-				
-			const query: IDataObject = {
-				page,
-				perPage,
-			};
 
-			const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
-			if (typeof selectedPlatform === 'string' && selectedPlatform.trim().length > 0) {
-				query.platforms = [selectedPlatform.trim().toLowerCase()];
-			}
+				const query: IDataObject = {
+					page,
+					perPage,
+				};
 
-			if (filter) {
-				query.search = filter;
-			}
+				const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
+				const platform =
+					typeof selectedPlatform === 'string' && selectedPlatform.trim().length > 0
+						? selectedPlatform.trim().toLowerCase()
+						: undefined;
 
-			const response = await viralAppApiRequest.call(
-				this,
-				'GET',
-				'/videos/tracked',
-				{},
-				query,
-			);
+				if (platform) {
+					query.platforms = [platform];
+				}
 
-			const results = (Array.isArray(response.data) ? response.data : [])
-				.map((video: IDataObject) => {
-					const videoId = getVideoId(video);
-					if (!videoId) {
-						return null;
-					}
-					return {
-						name: buildVideoDisplayName(video, videoId),
-						value: videoId,
-					};
-				})
-				.filter((entry: { name: string; value: string } | null): entry is { name: string; value: string } => entry !== null);
+				if (filter) {
+					query.search = filter;
+				}
 
-			return {
-				results,
-				paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-			};
+				const response = await viralAppApiRequest.call(this, 'GET', '/videos', {}, query);
+
+				const results = (Array.isArray(response.data) ? response.data : [])
+					.map((video: IDataObject) => {
+						const videoId = getVideoId(video);
+						if (!videoId) {
+							return null;
+						}
+						return {
+							name: buildVideoDisplayName(video, videoId),
+							value: videoId,
+						};
+					})
+					.filter(
+						(
+							entry: { name: string; value: string } | null,
+						): entry is { name: string; value: string } => entry !== null,
+					);
+
+				return {
+					results,
+					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+				};
+			},
 		},
-	},
-};
+	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
@@ -365,7 +366,10 @@ class ViralAppV1 implements INodeType {
 
 				const handler = resourceHandlers[operation];
 				if (!handler) {
-					throw new NodeOperationError(this.getNode(), `Unsupported operation "${operation}" for resource "${resource}".`);
+					throw new NodeOperationError(
+						this.getNode(),
+						`Unsupported operation "${operation}" for resource "${resource}".`,
+					);
 				}
 
 				const result = await handler.call(this, itemIndex);
@@ -403,7 +407,6 @@ class ViralAppV1 implements INodeType {
 
 		return [returnData];
 	}
-
 }
 
 export class ViralApp extends VersionedNodeType {
@@ -458,7 +461,11 @@ function normalizeEntry(entry: unknown): IDataObject {
 }
 
 function isExecutionData(entry: unknown): entry is INodeExecutionData {
-	return typeof entry === 'object' && entry !== null && ('json' in (entry as IDataObject) || 'binary' in (entry as IDataObject));
+	return (
+		typeof entry === 'object' &&
+		entry !== null &&
+		('json' in (entry as IDataObject) || 'binary' in (entry as IDataObject))
+	);
 }
 
 function normalizeResult(result: unknown): INodeExecutionData[] {

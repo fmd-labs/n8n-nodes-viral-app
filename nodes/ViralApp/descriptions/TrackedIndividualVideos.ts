@@ -348,5 +348,4 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 			},
 		],
 	},
-
 ];

@@ -3,7 +3,12 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { cleanEmpty, viralAppApiRequest, viralAppApiRequestAllItems } from './GenericFunctions';
 
-type OperationResult = IDataObject | IDataObject[] | INodeExecutionData | INodeExecutionData[] | void;
+type OperationResult =
+	| IDataObject
+	| IDataObject[]
+	| INodeExecutionData
+	| INodeExecutionData[]
+	| void;
 
 type OperationHandler = (this: IExecuteFunctions, itemIndex: number) => Promise<OperationResult>;
 
@@ -49,6 +54,7 @@ export const operationHandlers: Record<string, HandlerMap> = {
 	videoAnalytics: {
 		getAll: videoAnalyticsGetAll,
 		get: videoAnalyticsGet,
+		download: videoAnalyticsDownload,
 		getHistory: videoAnalyticsGetHistory,
 		getActivity: videoAnalyticsGetActivity,
 		export: videoAnalyticsExport,
@@ -204,9 +210,7 @@ async function toBinaryExport(
 		encoding: 'arraybuffer',
 	});
 
-	const rawData = Buffer.isBuffer(fileBuffer)
-		? fileBuffer
-		: Buffer.from(fileBuffer as ArrayBuffer);
+	const rawData = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer as ArrayBuffer);
 
 	const binary = await this.helpers.prepareBinaryData(rawData, fileName);
 	binary.mimeType = 'text/csv';
@@ -239,7 +243,9 @@ function resolveVideoSelection(
 	if (typeof rawSelection === 'string') {
 		selection = rawSelection.trim();
 	} else if (rawSelection && typeof rawSelection === 'object') {
-		const value = (rawSelection.value ?? rawSelection.id ?? rawSelection.name) as string | undefined;
+		const value = (rawSelection.value ?? rawSelection.id ?? rawSelection.name) as
+			| string
+			| undefined;
 		if (value) {
 			selection = value.trim();
 		}
@@ -274,6 +280,53 @@ function resolveVideoSelection(
 		platform,
 		videoId,
 	};
+}
+
+async function toBinaryDownload(
+	this: IExecuteFunctions,
+	response: IDataObject,
+	defaultFileName: string,
+	mimeFallback = 'application/octet-stream',
+): Promise<INodeExecutionData[]> {
+	const downloadUrl = response.downloadUrl as string | undefined;
+	if (!downloadUrl) {
+		return [
+			{
+				json: response,
+			},
+		];
+	}
+
+	const fileName = (response.fileName as string) || defaultFileName;
+
+	const fileBuffer = await this.helpers.httpRequest({
+		method: 'GET',
+		url: downloadUrl,
+		json: false,
+		encoding: 'arraybuffer',
+	});
+
+	const rawData = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer as ArrayBuffer);
+	const mimeType = mimeFallback;
+
+	const binary = await this.helpers.prepareBinaryData(rawData, fileName);
+	if (mimeType) {
+		binary.mimeType = mimeType;
+	}
+
+	return [
+		{
+			json: cleanEmpty({
+				fileName,
+				downloadUrl,
+				expiresAt: response.expiresAt,
+				consumedExtraCredit: response.consumedExtraCredit,
+			}),
+			binary: {
+				data: binary,
+			},
+		},
+	];
 }
 
 function applyDateRangeFilter(
@@ -446,7 +499,11 @@ async function trackedAccountsGetAll(this: IExecuteFunctions, itemIndex: number)
 }
 
 async function trackedAccountsAdd(this: IExecuteFunctions, itemIndex: number) {
-	const accountsCollection = this.getNodeParameter('accounts.account', itemIndex, []) as IDataObject[];
+	const accountsCollection = this.getNodeParameter(
+		'accounts.account',
+		itemIndex,
+		[],
+	) as IDataObject[];
 	if (!Array.isArray(accountsCollection) || accountsCollection.length === 0) {
 		throw new NodeOperationError(this.getNode(), 'At least one account must be provided.');
 	}
@@ -476,7 +533,11 @@ async function trackedAccountsGetCount(this: IExecuteFunctions, _itemIndex: numb
 }
 
 async function trackedAccountsRefresh(this: IExecuteFunctions, itemIndex: number) {
-	const accountsCollection = this.getNodeParameter('accounts.account', itemIndex, []) as IDataObject[];
+	const accountsCollection = this.getNodeParameter(
+		'accounts.account',
+		itemIndex,
+		[],
+	) as IDataObject[];
 	if (!Array.isArray(accountsCollection) || accountsCollection.length === 0) {
 		throw new NodeOperationError(this.getNode(), 'At least one account must be provided.');
 	}
@@ -490,7 +551,9 @@ async function trackedAccountsRefresh(this: IExecuteFunctions, itemIndex: number
 }
 
 async function trackedAccountsUpdateMaxVideos(this: IExecuteFunctions, itemIndex: number) {
-	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	const maxVideos = this.getNodeParameter('maxVideos', itemIndex) as number;
 	return viralAppApiRequest.call(this, 'PUT', `/accounts/tracked/${accountId}/max-videos`, {
 		newMaxVideos: maxVideos,
@@ -498,7 +561,9 @@ async function trackedAccountsUpdateMaxVideos(this: IExecuteFunctions, itemIndex
 }
 
 async function trackedAccountsUpdateHashtags(this: IExecuteFunctions, itemIndex: number) {
-	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	const hashtags = parseHashtags(this.getNodeParameter('hashtags', itemIndex));
 	return viralAppApiRequest.call(this, 'PUT', `/accounts/tracked/${accountId}/hashtags`, {
 		hashtagsFilter: hashtags ?? [],
@@ -506,8 +571,14 @@ async function trackedAccountsUpdateHashtags(this: IExecuteFunctions, itemIndex:
 }
 
 async function trackedAccountsUpdateProjectHashtags(this: IExecuteFunctions, itemIndex: number) {
-	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
-	const entries = this.getNodeParameter('projectHashtags.projectHashtag', itemIndex, []) as IDataObject[];
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
+	const entries = this.getNodeParameter(
+		'projectHashtags.projectHashtag',
+		itemIndex,
+		[],
+	) as IDataObject[];
 
 	if (!Array.isArray(entries) || entries.length === 0) {
 		throw new NodeOperationError(this.getNode(), 'Provide at least one project hashtag entry.');
@@ -520,17 +591,17 @@ async function trackedAccountsUpdateProjectHashtags(this: IExecuteFunctions, ite
 		if (typeof rawProject === 'string') {
 			projectId = rawProject;
 		} else if (rawProject && typeof rawProject === 'object') {
-			const candidate = (rawProject as IDataObject).value ?? (rawProject as IDataObject).id ?? (rawProject as IDataObject).name;
+			const candidate =
+				(rawProject as IDataObject).value ??
+				(rawProject as IDataObject).id ??
+				(rawProject as IDataObject).name;
 			if (typeof candidate === 'string') {
 				projectId = candidate;
 			}
 		}
 
 		if (!projectId) {
-			throw new NodeOperationError(
-				this.getNode(),
-				`Project is required for entry #${index + 1}.`,
-			);
+			throw new NodeOperationError(this.getNode(), `Project is required for entry #${index + 1}.`);
 		}
 
 		const hashtags = parseHashtags(entry.hashtags);
@@ -585,10 +656,12 @@ async function trackedIndividualVideosAdd(this: IExecuteFunctions, itemIndex: nu
 	}
 
 	return viralAppApiRequest.call(this, 'POST', '/videos/tracked', {
-		videos: videosCollection.map((video) => cleanEmpty({
-			platform: video.platform,
-			videoId: video.videoId,
-		})),
+		videos: videosCollection.map((video) =>
+			cleanEmpty({
+				platform: video.platform,
+				videoId: video.videoId,
+			}),
+		),
 	});
 }
 
@@ -637,31 +710,44 @@ async function projectsGetAll(this: IExecuteFunctions, itemIndex: number) {
 
 async function projectsCreate(this: IExecuteFunctions, itemIndex: number) {
 	const name = this.getNodeParameter('name', itemIndex) as string;
-	const additional = (this.getNodeParameter('additionalFields', itemIndex, {}) as IDataObject) || {};
+	const additional =
+		(this.getNodeParameter('additionalFields', itemIndex, {}) as IDataObject) || {};
 	return viralAppApiRequest.call(this, 'POST', '/projects', cleanEmpty({ name, ...additional }));
 }
 
 async function projectsUpdate(this: IExecuteFunctions, itemIndex: number) {
-	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, { extractValue: true }) as string;
+	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	const updateFields = (this.getNodeParameter('updateFields', itemIndex, {}) as IDataObject) || {};
 	return viralAppApiRequest.call(this, 'PUT', `/projects/${projectId}`, cleanEmpty(updateFields));
 }
 
 async function projectsDelete(this: IExecuteFunctions, itemIndex: number) {
-	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, { extractValue: true }) as string;
+	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	await viralAppApiRequest.call(this, 'DELETE', `/projects/${projectId}`);
 	return { deleted: true };
 }
 
 async function projectsAddAccount(this: IExecuteFunctions, itemIndex: number) {
-	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, { extractValue: true }) as string;
-	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
+	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	return viralAppApiRequest.call(this, 'POST', `/projects/${projectId}/accounts/${accountId}`);
 }
 
 async function projectsRemoveAccount(this: IExecuteFunctions, itemIndex: number) {
-	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, { extractValue: true }) as string;
-	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, { extractValue: true }) as string;
+	const projectId = this.getNodeParameter('projectId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
 	await viralAppApiRequest.call(this, 'DELETE', `/projects/${projectId}/accounts/${accountId}`);
 	return { deleted: true };
 }
@@ -759,6 +845,18 @@ async function videoAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) 
 async function videoAnalyticsGet(this: IExecuteFunctions, itemIndex: number) {
 	const { platform, videoId } = resolveVideoSelection.call(this, itemIndex);
 	return viralAppApiRequest.call(this, 'GET', `/videos/${platform}/${videoId}`);
+}
+
+async function videoAnalyticsDownload(this: IExecuteFunctions, itemIndex: number) {
+	const { platform, videoId } = resolveVideoSelection.call(this, itemIndex);
+	const response = (await viralAppApiRequest.call(
+		this,
+		'GET',
+		`/videos/${platform}/${videoId}/download`,
+	)) as IDataObject;
+
+	const defaultFileName = `${platform}-${videoId}.mp4`;
+	return toBinaryDownload.call(this, response, defaultFileName, 'video/mp4');
 }
 
 async function videoAnalyticsGetHistory(this: IExecuteFunctions, itemIndex: number) {
@@ -880,7 +978,7 @@ async function generalAnalyticsGetTopVideos(this: IExecuteFunctions, itemIndex: 
 
 	const response = await viralAppApiRequest.call(this, 'GET', '/analytics/top-videos', {}, query);
 
-	const items = Array.isArray(response) ? response : response?.data ?? response;
+	const items = Array.isArray(response) ? response : (response?.data ?? response);
 
 	if (!simplify || !Array.isArray(items)) {
 		return items;
@@ -908,7 +1006,7 @@ async function generalAnalyticsGetTopAccounts(this: IExecuteFunctions, itemIndex
 	applyDateRangeFilter.call(this, query, fromRaw, toRaw);
 
 	const response = await viralAppApiRequest.call(this, 'GET', '/analytics/top-accounts', {}, query);
-	const items = Array.isArray(response) ? response : response?.data ?? response;
+	const items = Array.isArray(response) ? response : (response?.data ?? response);
 
 	if (!simplify || !Array.isArray(items)) {
 		return items;
@@ -934,7 +1032,13 @@ async function generalAnalyticsGetInteractionMetrics(this: IExecuteFunctions, it
 	const query = buildGeneralFilters(filters);
 	applyDateRangeFilter.call(this, query, fromRaw, toRaw);
 
-	const response = await viralAppApiRequest.call(this, 'GET', '/analytics/interaction-metrics', {}, query);
+	const response = await viralAppApiRequest.call(
+		this,
+		'GET',
+		'/analytics/interaction-metrics',
+		{},
+		query,
+	);
 
 	if (!simplify) {
 		return response;

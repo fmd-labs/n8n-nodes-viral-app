@@ -13,6 +13,12 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Download',
+				value: 'download',
+				description: 'Download the video file',
+				action: 'Download video',
+			},
+			{
 				name: 'Export',
 				value: 'export',
 				description: 'Export videos to CSV',
@@ -111,7 +117,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['videoAnalytics'],
-				operation: ['get', 'getHistory'],
+				operation: ['get', 'getHistory', 'download'],
 			},
 		},
 		default: 'tiktok',
@@ -120,17 +126,17 @@ export const videoAnalyticsFields: INodeProperties[] = [
 	},
 	{
 		displayName: 'Video',
-	name: 'platformVideoId',
-	type: 'resourceLocator',
-	default: { mode: 'list', value: '' },
-	required: true,
-	typeOptions: {
-		loadOptionsDependsOn: ['platform'],
-	},
-	displayOptions: {
-		show: {
-			resource: ['videoAnalytics'],
-			operation: ['get', 'getHistory'],
+		name: 'platformVideoId',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
+		required: true,
+		typeOptions: {
+			loadOptionsDependsOn: ['platform'],
+		},
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['get', 'getHistory', 'download'],
 			},
 		},
 		modes: [
@@ -221,7 +227,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -264,7 +271,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -418,13 +426,14 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		},
 		options: [
 			{
-			name: 'Projects',
-			value: 'projects',
-			description: 'Return full project objects for the projects property instead of IDs',
-		},
-	],
+				name: 'Projects',
+				value: 'projects',
+				description: 'Return full project objects for the projects property instead of IDs',
+			},
+		],
 		default: [],
-		description: 'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
+		description:
+			'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
 		hint: 'Expanded responses include nested objects and increase payload size.',
 	},
 	// ----------------------------------------
@@ -483,7 +492,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -493,7 +503,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Content Types',
@@ -567,7 +578,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Content Types',
@@ -594,7 +606,8 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Date Range',
@@ -624,7 +637,7 @@ export const videoAnalyticsFields: INodeProperties[] = [
 							},
 						],
 					},
-			],
+				],
 			},
 			{
 				displayName: 'Sort Column',

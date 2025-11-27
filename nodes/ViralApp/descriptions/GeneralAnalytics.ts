@@ -91,7 +91,13 @@ export const generalAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['generalAnalytics'],
-				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
+				operation: [
+					'getKpis',
+					'getTopVideos',
+					'getTopAccounts',
+					'getInteractionMetrics',
+					'exportDailyGains',
+				],
 			},
 		},
 		// Routing removed - handled in execute function
@@ -106,7 +112,13 @@ export const generalAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['generalAnalytics'],
-				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
+				operation: [
+					'getKpis',
+					'getTopVideos',
+					'getTopAccounts',
+					'getInteractionMetrics',
+					'exportDailyGains',
+				],
 			},
 		},
 		// Routing removed - handled in execute function
@@ -124,7 +136,13 @@ export const generalAnalyticsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['generalAnalytics'],
-				operation: ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
+				operation: [
+					'getKpis',
+					'getTopVideos',
+					'getTopAccounts',
+					'getInteractionMetrics',
+					'exportDailyGains',
+				],
 			},
 		},
 		options: [
@@ -163,7 +181,8 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -179,10 +198,17 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getAccounts',
 				},
 				default: [],
-				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				displayOptions: {
 					show: {
-						'/operation': ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'],
+						'/operation': [
+							'getKpis',
+							'getTopVideos',
+							'getTopAccounts',
+							'getInteractionMetrics',
+							'exportDailyGains',
+						],
 					},
 				},
 				routing: {
@@ -321,7 +347,8 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'viewCount',
-				description: 'Metric to sort videos by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
+				description:
+					'Metric to sort videos by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
 				routing: {
 					send: {
 						type: 'query',
@@ -406,7 +433,8 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'viewCount',
-				description: 'Metric to sort accounts by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
+				description:
+					'Metric to sort accounts by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
 				routing: {
 					send: {
 						type: 'query',

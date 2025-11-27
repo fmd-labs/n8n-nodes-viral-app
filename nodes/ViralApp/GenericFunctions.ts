@@ -9,6 +9,8 @@ import {
 	JsonObject,
 } from 'n8n-workflow';
 
+const BASE_URL = (process.env.VIRALAPP_BASE_URL || 'https://viral.app/api/v1').replace(/\/$/, '');
+
 /**
  * Make an authenticated API request to ViralApp
  */
@@ -25,7 +27,7 @@ export async function viralAppApiRequest(
 	const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 	const options: IHttpRequestOptions = {
 		method,
-		url: `https://viral.app/api/v1${path}`,
+		url: `${BASE_URL}${path}`,
 		qs: sanitizedQuery,
 		json: true,
 		headers: {},
@@ -53,18 +55,15 @@ export async function viralAppApiRequest(
 	}
 
 	try {
-		return await this.helpers.httpRequestWithAuthentication.call(
-			this,
-			'viralAppApi',
-			options,
-		);
+		return await this.helpers.httpRequestWithAuthentication.call(this, 'viralAppApi', options);
 	} catch (error) {
 		const statusCode = (error as IDataObject).statusCode ?? (error as IDataObject).httpCode;
 
 		if (statusCode === 404) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Resource not found',
-				description: 'The requested resource could not be found. Please check the ID and try again.',
+				description:
+					'The requested resource could not be found. Please check the ID and try again.',
 			});
 		}
 
@@ -101,13 +100,11 @@ export async function viralAppApiRequestAllItems(
 	const baseQuery = { ...query };
 
 	while (true) {
-		const response = await viralAppApiRequest.call(
-			this,
-			method,
-			endpoint,
-			body,
-			{ ...baseQuery, page: currentPage, perPage: 100 },
-		);
+		const response = await viralAppApiRequest.call(this, method, endpoint, body, {
+			...baseQuery,
+			page: currentPage,
+			perPage: 100,
+		});
 
 		const items = Array.isArray(response?.data) ? response.data : [];
 		aggregated.push(...items);

@@ -217,7 +217,8 @@ export const trackedAccountsFields: INodeProperties[] = [
 					loadOptionsMethod: 'getProjects',
 				},
 				default: [],
-				description: 'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 				routing: {
 					send: {
 						type: 'query',
@@ -371,17 +372,17 @@ export const trackedAccountsFields: INodeProperties[] = [
 								name: '10',
 								value: 10,
 							},
-					{
-						name: '30',
-						value: 30,
-					},
-					{
-						name: '60',
-						value: 60,
-					},
-					{
-						name: '100',
-						value: 100,
+							{
+								name: '30',
+								value: 30,
+							},
+							{
+								name: '60',
+								value: 60,
+							},
+							{
+								name: '100',
+								value: 100,
 							},
 							{
 								name: '300',
@@ -531,17 +532,17 @@ export const trackedAccountsFields: INodeProperties[] = [
 				name: '10',
 				value: 10,
 			},
-		{
-			name: '30',
-			value: 30,
-		},
-		{
-			name: '60',
-			value: 60,
-		},
-		{
-			name: '100',
-			value: 100,
+			{
+				name: '30',
+				value: 30,
+			},
+			{
+				name: '60',
+				value: 60,
+			},
+			{
+				name: '100',
+				value: 100,
 			},
 			{
 				name: '300',
@@ -587,75 +588,74 @@ export const trackedAccountsFields: INodeProperties[] = [
 	// ----------------------------------------
 	// trackedAccounts: updateProjectHashtags
 	// ----------------------------------------
-{
-	displayName: 'Project Hashtags',
-	name: 'projectHashtags',
-	type: 'fixedCollection',
-	typeOptions: {
-		multipleValues: true,
-	},
-	default: {},
-	required: true,
-	placeholder: 'Add Project Hashtag',
-	displayOptions: {
-		show: {
-			resource: ['trackedAccounts'],
-			operation: ['updateProjectHashtags'],
+	{
+		displayName: 'Project Hashtags',
+		name: 'projectHashtags',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
 		},
-	},
-	options: [
-		{
-			displayName: 'Project Hashtag',
-			name: 'projectHashtag',
-			values: [
-				{
-					displayName: 'Project',
-					name: 'projectId',
-					type: 'resourceLocator',
-					default: { mode: 'list', value: '' },
-					required: true,
-					extractValue: {
-						type: 'regex',
-						regex: '^[a-zA-Z0-9-_]+$',
-					},
-					modes: [
-						{
-							displayName: 'From List',
-							name: 'list',
-							type: 'list',
-							placeholder: 'Select a project...',
-							typeOptions: {
-								searchListMethod: 'projectSearch',
-								searchable: true,
-							},
+		default: {},
+		required: true,
+		placeholder: 'Add Project Hashtag',
+		displayOptions: {
+			show: {
+				resource: ['trackedAccounts'],
+				operation: ['updateProjectHashtags'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Project Hashtag',
+				name: 'projectHashtag',
+				values: [
+					{
+						displayName: 'Project',
+						name: 'projectId',
+						type: 'resourceLocator',
+						default: { mode: 'list', value: '' },
+						required: true,
+						extractValue: {
+							type: 'regex',
+							regex: '^[a-zA-Z0-9-_]+$',
 						},
-						{
-							displayName: 'By ID',
-							name: 'id',
-							type: 'string',
-							placeholder: 'Enter project ID',
-							validation: [
-								{
-									type: 'regex',
-									properties: {
-										regex: '^[a-zA-Z0-9-_]+$',
-										errorMessage: 'Not a valid project ID',
-									},
+						modes: [
+							{
+								displayName: 'From List',
+								name: 'list',
+								type: 'list',
+								placeholder: 'Select a project...',
+								typeOptions: {
+									searchListMethod: 'projectSearch',
+									searchable: true,
 								},
-							],
-						},
-					],
-				},
-				{
-					displayName: 'Hashtags Filter',
-					name: 'hashtags',
-					type: 'string',
-					default: '',
-					description: 'Comma-separated list of hashtags for the project',
-				},
-			],
-		},
-	],
-},
-
+							},
+							{
+								displayName: 'By ID',
+								name: 'id',
+								type: 'string',
+								placeholder: 'Enter project ID',
+								validation: [
+									{
+										type: 'regex',
+										properties: {
+											regex: '^[a-zA-Z0-9-_]+$',
+											errorMessage: 'Not a valid project ID',
+										},
+									},
+								],
+							},
+						],
+					},
+					{
+						displayName: 'Hashtags Filter',
+						name: 'hashtags',
+						type: 'string',
+						default: '',
+						description: 'Comma-separated list of hashtags for the project',
+					},
+				],
+			},
+		],
+	},
 ];
