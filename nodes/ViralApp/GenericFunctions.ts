@@ -39,7 +39,7 @@ export async function viralAppApiRequest(
 	};
 
 	const methodUpper = method.toUpperCase();
-	const shouldSendBody = ['POST', 'PUT', 'PATCH'].includes(methodUpper);
+	const shouldSendBody = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(methodUpper);
 
 	if (shouldSendBody) {
 		options.body = Object.keys(sanitizedBody).length > 0 ? sanitizedBody : {};
@@ -62,6 +62,17 @@ export async function viralAppApiRequest(
 		return await this.helpers.httpRequestWithAuthentication.call(this, 'viralAppApi', options);
 	} catch (error) {
 		const statusCode = (error as IDataObject).statusCode ?? (error as IDataObject).httpCode;
+		const requestInfo = `${methodUpper} ${options.url}`;
+		const metaDescription = `Request: ${requestInfo}\nBase URL: ${baseUrl}\nQS: ${JSON.stringify(
+			options.qs,
+		)}\nBody keys: ${options.body ? Object.keys(options.body as IDataObject).join(',') : 'none'}`;
+
+		if (statusCode === 400) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Bad request - please check your parameters',
+				description: metaDescription,
+			});
+		}
 
 		if (statusCode === 404) {
 			throw new NodeApiError(this.getNode(), error as JsonObject, {
@@ -85,7 +96,9 @@ export async function viralAppApiRequest(
 			});
 		}
 
-		throw new NodeApiError(this.getNode(), error as JsonObject);
+		throw new NodeApiError(this.getNode(), error as JsonObject, {
+			description: metaDescription,
+		});
 	}
 }
 

@@ -1051,7 +1051,21 @@ async function videoAnalyticsRestoreExcluded(this: IExecuteFunctions, itemIndex:
 		throw new NodeOperationError(this.getNode(), 'Excluded video ID is required.');
 	}
 
-	return viralAppApiRequest.call(this, 'DELETE', '/videos/excluded', { ids: [excludedId] });
+	const payload = { ids: [excludedId] };
+
+	// Send both as body and as query to satisfy validation and infrastructure that strip DELETE bodies.
+	const response = await viralAppApiRequest.call(
+		this,
+		'DELETE',
+		'/videos/excluded',
+		payload,
+		payload,
+	);
+
+	// Normalize a simple shape for the UI
+	return {
+		deleted: (response as IDataObject)?.deleted ?? response,
+	};
 }
 
 function buildGeneralFilters(filters: IDataObject): IDataObject {
