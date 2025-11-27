@@ -76,17 +76,32 @@ export const accountAnalyticsFields: INodeProperties[] = [
 			},
 		},
 		options: [
+	{
+		displayName: 'Account Names or IDs',
+		name: 'accounts',
+		type: 'resourceLocator',
+		default: {
+			mode: 'list',
+			value: '',
+		},
+		modes: [
 			{
-				displayName: 'Account Names or IDs',
-				name: 'accounts',
-				type: 'multiOptions',
+				displayName: 'List',
+				name: 'list',
+				type: 'list',
 				typeOptions: {
-					loadOptionsMethod: 'getAccounts',
+					searchListMethod: 'accountSearch',
 				},
-				default: [],
-				description:
-					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
+			{
+				displayName: 'ID',
+				name: 'id',
+				type: 'string',
+			},
+		],
+		description:
+			'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
 			{
 				displayName: 'Content Types',
 				name: 'contentTypes',
@@ -165,17 +180,32 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					},
 				},
 			},
+	{
+		displayName: 'Project Names or IDs',
+		name: 'projects',
+		type: 'resourceLocator',
+		default: {
+			mode: 'list',
+			value: '',
+		},
+		modes: [
 			{
-				displayName: 'Project Names or IDs',
-				name: 'projects',
-				type: 'multiOptions',
+				displayName: 'List',
+				name: 'list',
+				type: 'list',
 				typeOptions: {
-					loadOptionsMethod: 'getProjects',
+					searchListMethod: 'projectSearch',
 				},
-				default: [],
-				description:
-					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
+			{
+				displayName: 'ID',
+				name: 'id',
+				type: 'string',
+			},
+		],
+		description:
+			'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
 			{
 				displayName: 'Search',
 				name: 'search',
