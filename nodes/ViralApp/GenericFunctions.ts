@@ -123,7 +123,11 @@ export async function viralAppApiRequestAllItems(
 			perPage: 100,
 		});
 
-		const items = Array.isArray(response?.data) ? response.data : [];
+		const items = Array.isArray(response?.data)
+			? response.data
+			: Array.isArray(response)
+				? response
+				: [];
 		aggregated.push(...items);
 
 		const pageCount = response?.pageCount ?? 0;

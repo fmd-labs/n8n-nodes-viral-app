@@ -17,60 +17,30 @@ export const generalAnalyticsOperations: INodeProperties[] = [
 				value: 'exportDailyGains',
 				description: 'Export video daily gains to CSV',
 				action: 'Export video daily gains',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/analytics/video-daily-gains/export',
-					},
-				},
 			},
 			{
 				name: 'Get Interaction Metrics',
 				value: 'getInteractionMetrics',
 				description: 'Get interaction metrics over time',
 				action: 'Get interaction metrics',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/interaction-metrics',
-					},
-				},
 			},
 			{
 				name: 'Get KPIs',
 				value: 'getKpis',
 				description: 'Get key performance indicators',
 				action: 'Get key performance indicators',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/kpis',
-					},
-				},
 			},
 			{
 				name: 'Get Top Accounts',
 				value: 'getTopAccounts',
 				description: 'Get top performing accounts',
 				action: 'Get top performing accounts',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/top-accounts',
-					},
-				},
 			},
 			{
 				name: 'Get Top Videos',
 				value: 'getTopVideos',
 				description: 'Get top performing videos',
 				action: 'Get top performing videos',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/analytics/top-videos',
-					},
-				},
 			},
 		],
 		default: 'getKpis',
@@ -435,12 +405,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				default: [],
 				description:
 					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'projects',
-					},
-				},
 			},
 		],
 	},

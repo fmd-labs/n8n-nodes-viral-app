@@ -17,105 +17,42 @@ export const trackedAccountsOperations: INodeProperties[] = [
 				value: 'add',
 				description: 'Add new tracked accounts',
 				action: 'Add tracked accounts',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/accounts/tracked',
-					},
-				},
 			},
 			{
 				name: 'Get Count',
 				value: 'getCount',
 				description: 'Get count of tracked accounts',
 				action: 'Get tracked accounts count',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/accounts/tracked/count',
-					},
-				},
 			},
 			{
 				name: 'Get Many',
 				value: 'getAll',
 				description: 'List many tracked accounts',
 				action: 'List all tracked accounts',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/accounts/tracked',
-						qs: {
-							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
-							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
-						},
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: {
-									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									pageCount: '={{$response.body.pageCount}}',
-									totalRows: '={{$response.body.totalRows}}',
-								},
-							},
-						],
-					},
-				},
 			},
 			{
 				name: 'Refresh',
 				value: 'refresh',
 				description: 'Refresh tracked accounts data',
 				action: 'Refresh tracked accounts',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/accounts/tracked/refresh',
-					},
-				},
 			},
 			{
 				name: 'Update Hashtags',
 				value: 'updateHashtags',
 				description: 'Update hashtag filters for an account',
 				action: 'Update hashtags for tracked account',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/accounts/tracked/{{$parameter.accountId}}/hashtags',
-					},
-				},
 			},
 			{
 				name: 'Update Max Videos',
 				value: 'updateMaxVideos',
 				description: 'Update maximum videos to track for an account',
 				action: 'Update max videos for tracked account',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/accounts/tracked/{{$parameter.accountId}}/max-videos',
-					},
-				},
 			},
 			{
 				name: 'Update Project Hashtags',
 				value: 'updateProjectHashtags',
 				description: 'Update project-specific hashtag filters',
 				action: 'Update project hashtags for tracked account',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/accounts/tracked/{{$parameter.accountId}}/project-hashtags',
-					},
-				},
 			},
 		],
 		default: 'getAll',
@@ -199,19 +136,28 @@ export const trackedAccountsFields: INodeProperties[] = [
 			{
 				displayName: 'Project Names or IDs',
 				name: 'projects',
-				type: 'multiOptions',
-				typeOptions: {
-					loadOptionsMethod: 'getProjects',
+				type: 'resourceLocator',
+				default: {
+					mode: 'list',
+					value: '',
 				},
-				default: [],
+				modes: [
+					{
+						displayName: 'List',
+						name: 'list',
+						type: 'list',
+						typeOptions: {
+							searchListMethod: 'projectSearch',
+						},
+					},
+					{
+						displayName: 'ID',
+						name: 'id',
+						type: 'string',
+					},
+				],
 				description:
 					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'projects',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Column',

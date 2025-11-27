@@ -17,57 +17,18 @@ export const trackedIndividualVideosOperations: INodeProperties[] = [
 				value: 'getAll',
 				description: 'List many individually tracked videos',
 				action: 'List all individually tracked videos',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/videos/tracked',
-						qs: {
-							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
-							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
-						},
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: {
-									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									pageCount: '={{$response.body.pageCount}}',
-									totalRows: '={{$response.body.totalRows}}',
-								},
-							},
-						],
-					},
-				},
 			},
 			{
 				name: 'Add',
 				value: 'add',
 				description: 'Add new videos to track individually',
 				action: 'Add individually tracked videos',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/videos/tracked',
-					},
-				},
 			},
 			{
 				name: 'Refresh',
 				value: 'refresh',
 				description: 'Refresh tracked video data',
 				action: 'Refresh individually tracked videos',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/videos/tracked/refresh',
-					},
-				},
 			},
 		],
 		default: 'getAll',

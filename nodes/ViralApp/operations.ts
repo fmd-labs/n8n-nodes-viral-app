@@ -87,6 +87,40 @@ function formatDateOnly(date: Date): string {
 	return `${year}-${month}-${day}`;
 }
 
+function toId(value: unknown): string | undefined {
+	if (typeof value === 'string') {
+		const trimmed = value.trim();
+		return trimmed || undefined;
+	}
+
+	if (typeof value === 'number') {
+		return value.toString();
+	}
+
+	if (typeof value === 'object' && value !== null) {
+		const candidate = (value as IDataObject).value ?? (value as IDataObject).id ?? (value as IDataObject).name;
+		if (typeof candidate === 'string') {
+			const trimmed = candidate.trim();
+			return trimmed || undefined;
+		}
+	}
+
+	return undefined;
+}
+
+function toIdArray(raw: unknown): string[] | undefined {
+	if (raw === undefined || raw === null) {
+		return undefined;
+	}
+
+	const values = Array.isArray(raw) ? raw : [raw];
+	const ids = values
+		.map((entry) => toId(entry))
+		.filter((entry): entry is string => !!entry);
+
+	return ids.length ? ids : undefined;
+}
+
 function getDefaultExportDateRange(): IDataObject {
 	const end = new Date();
 	const start = new Date(end);
@@ -205,6 +239,7 @@ async function toBinaryExport(
 	}
 
 	const fileName = (response.fileName as string) || defaultFileName;
+	const responseMime = (response.contentType as string) || (response.mimeType as string);
 
 	const fileBuffer = await this.helpers.httpRequest({
 		method: 'GET',
@@ -216,7 +251,7 @@ async function toBinaryExport(
 	const rawData = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer as ArrayBuffer);
 
 	const binary = await this.helpers.prepareBinaryData(rawData, fileName);
-	binary.mimeType = 'text/csv';
+	binary.mimeType = responseMime || 'text/csv';
 
 	return [
 		{
@@ -301,6 +336,7 @@ async function toBinaryDownload(
 	}
 
 	const fileName = (response.fileName as string) || defaultFileName;
+	const responseMime = (response.contentType as string) || (response.mimeType as string);
 
 	const fileBuffer = await this.helpers.httpRequest({
 		method: 'GET',
@@ -310,7 +346,7 @@ async function toBinaryDownload(
 	});
 
 	const rawData = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer as ArrayBuffer);
-	const mimeType = mimeFallback;
+	const mimeType = responseMime || mimeFallback;
 
 	const binary = await this.helpers.prepareBinaryData(rawData, fileName);
 	if (mimeType) {
@@ -349,6 +385,20 @@ function applyDateRangeFilter(
 	}
 
 	if (from && to) {
+		const fromDate = new Date(from);
+		const toDate = new Date(to);
+
+		if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
+			throw new NodeOperationError(this.getNode(), 'Invalid date range provided.');
+		}
+
+		if (fromDate > toDate) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'Date Range From must be on or before Date Range To.',
+			);
+		}
+
 		query['dateRange[from]'] = from;
 		query['dateRange[to]'] = to;
 	}
@@ -370,16 +420,47 @@ function getLimit(this: IExecuteFunctions, itemIndex: number): number {
 	return Math.max(Math.min(limit, 100), 1);
 }
 
-async function accountAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) {
+async function fetchCollection(
+	this: IExecuteFunctions,
+	endpoint: string,
+	itemIndex: number,
+	query: IDataObject,
+	simplifyFn?: (item: IDataObject) => IDataObject,
+): Promise<IDataObject[]> {
 	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
+	let items: IDataObject[];
+
+	if (returnAll) {
+		items = await viralAppApiRequestAllItems.call(this, 'GET', endpoint, {}, query);
+	} else {
+		const limit = getLimit.call(this, itemIndex);
+		const response = await viralAppApiRequest.call(
+			this,
+			'GET',
+			endpoint,
+			{},
+			{ ...query, page: 1, perPage: limit },
+		);
+		const data = Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : [];
+		items = (data as IDataObject[]).slice(0, limit);
+	}
+
+	if (!Array.isArray(items)) {
+		items = [];
+	}
+
+	return simplifyFn ? items.map(simplifyFn) : items;
+}
+
+async function accountAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) {
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
 	const query: IDataObject = cleanEmpty({
 		search: filters.search,
 		platforms: filters.platforms,
-		accounts: filters.accounts,
-		projects: filters.projects,
+		accounts: toIdArray(filters.accounts),
+		projects: toIdArray(filters.projects),
 		contentTypes: filters.contentTypes,
 	});
 
@@ -393,28 +474,7 @@ async function accountAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number
 		query.sortDir = filters.sortDir;
 	}
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/accounts', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/accounts',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	if (!Array.isArray(items)) {
-		items = [];
-	}
-
-	return simplify ? items.map(simplifyAccountAnalytics) : items;
+	return fetchCollection.call(this, '/accounts', itemIndex, query, simplify ? simplifyAccountAnalytics : undefined);
 }
 
 async function accountAnalyticsExport(this: IExecuteFunctions, itemIndex: number) {
@@ -425,17 +485,9 @@ async function accountAnalyticsExport(this: IExecuteFunctions, itemIndex: number
 		payload.search = exportBody.search;
 	}
 
-	if (Array.isArray(exportBody.platforms) && exportBody.platforms.length) {
-		payload.platforms = exportBody.platforms;
-	}
-
-	if (Array.isArray(exportBody.accounts) && exportBody.accounts.length) {
-		payload.accounts = exportBody.accounts;
-	}
-
-	if (Array.isArray(exportBody.projects) && exportBody.projects.length) {
-		payload.projects = exportBody.projects;
-	}
+	payload.platforms = toIdArray(exportBody.platforms);
+	payload.accounts = toIdArray(exportBody.accounts);
+	payload.projects = toIdArray(exportBody.projects);
 
 	if (Array.isArray(exportBody.contentTypes) && exportBody.contentTypes.length) {
 		payload.contentTypes = exportBody.contentTypes;
@@ -463,7 +515,6 @@ async function accountAnalyticsExport(this: IExecuteFunctions, itemIndex: number
 }
 
 async function trackedAccountsGetAll(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 	const usernameFilter = filters.username as string | undefined;
@@ -472,33 +523,18 @@ async function trackedAccountsGetAll(this: IExecuteFunctions, itemIndex: number)
 		username: usernameFilter,
 		search: usernameFilter,
 		platforms: filters.platforms,
-		projects: filters.projects,
+		projects: toIdArray(filters.projects),
 		sortCol: filters.sortCol,
 		sortDir: filters.sortDir,
 	});
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/accounts/tracked', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/accounts/tracked',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	if (!Array.isArray(items)) {
-		items = [];
-	}
-
-	return simplify ? items.map(simplifyTrackedAccount) : items;
+	return fetchCollection.call(
+		this,
+		'/accounts/tracked',
+		itemIndex,
+		query,
+		simplify ? simplifyTrackedAccount : undefined,
+	);
 }
 
 async function trackedAccountsAdd(this: IExecuteFunctions, itemIndex: number) {
@@ -621,7 +657,6 @@ async function trackedAccountsUpdateProjectHashtags(this: IExecuteFunctions, ite
 }
 
 async function trackedIndividualVideosGetAll(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
@@ -632,24 +667,13 @@ async function trackedIndividualVideosGetAll(this: IExecuteFunctions, itemIndex:
 		sortDir: filters.sortDir,
 	});
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/videos/tracked', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/videos/tracked',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	return simplify ? items.map(simplifyTrackedVideo) : items;
+	return fetchCollection.call(
+		this,
+		'/videos/tracked',
+		itemIndex,
+		query,
+		simplify ? simplifyTrackedVideo : undefined,
+	);
 }
 
 async function trackedIndividualVideosAdd(this: IExecuteFunctions, itemIndex: number) {
@@ -683,7 +707,6 @@ async function trackedIndividualVideosRefresh(this: IExecuteFunctions, itemIndex
 }
 
 async function projectsGetAll(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
@@ -691,24 +714,13 @@ async function projectsGetAll(this: IExecuteFunctions, itemIndex: number) {
 		search: filters.name,
 	});
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/projects', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/projects',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	return simplify ? items.map(simplifyProject) : items;
+	return fetchCollection.call(
+		this,
+		'/projects',
+		itemIndex,
+		query,
+		simplify ? simplifyProject : undefined,
+	);
 }
 
 async function projectsCreate(this: IExecuteFunctions, itemIndex: number) {
@@ -756,7 +768,6 @@ async function projectsRemoveAccount(this: IExecuteFunctions, itemIndex: number)
 }
 
 async function integrationsGetApps(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
@@ -767,28 +778,10 @@ async function integrationsGetApps(this: IExecuteFunctions, itemIndex: number) {
 		sortDir: filters.sortDir,
 	});
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/apps', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/apps',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	return simplify ? items.map(simplifyApp) : items;
+	return fetchCollection.call(this, '/apps', itemIndex, query, simplify ? simplifyApp : undefined);
 }
 
 async function videoAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const expand = (this.getNodeParameter('expand', itemIndex, []) as string[]) || [];
 	const simplify = getSimplifyFlag.call(this, itemIndex);
@@ -796,8 +789,8 @@ async function videoAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) 
 	const query: IDataObject = cleanEmpty({
 		search: filters.search,
 		platforms: filters.platforms,
-		projects: filters.projects,
-		accounts: filters.accounts,
+		projects: toIdArray(filters.projects),
+		accounts: toIdArray(filters.accounts),
 		sortCol: filters.sortCol,
 		sortDir: filters.sortDir,
 		contentTypes: filters.contentTypes,
@@ -806,43 +799,24 @@ async function videoAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) 
 
 	applyDateRangeFilter.call(this, query, filters.dateRangeFrom, filters.dateRangeTo);
 
-	let items: IDataObject[];
+	const items = await fetchCollection.call(this, '/videos', itemIndex, query);
 
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/videos', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/videos',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
+	if (simplify) {
+		return items.map((item) => ({
+			id: item.id,
+			platformVideoId: item.platformVideoId,
+			platform: item.platform,
+			title: item.title,
+			accountUsername: item.accountUsername,
+			viewCount: item.viewCount,
+			likeCount: item.likeCount,
+			commentCount: item.commentCount,
+			shareCount: item.shareCount,
+			publishedAt: item.publishedAt,
+		}));
 	}
 
-	if (!Array.isArray(items)) {
-		items = [];
-	}
-
-	if (!simplify) {
-		return items;
-	}
-
-	return items.map((item) => ({
-		id: item.id,
-		platformVideoId: item.platformVideoId,
-		platform: item.platform,
-		title: item.title,
-		accountUsername: item.accountUsername,
-		viewCount: item.viewCount,
-		likeCount: item.likeCount,
-		commentCount: item.commentCount,
-		shareCount: item.shareCount,
-		publishedAt: item.publishedAt,
-	}));
+	return items;
 }
 
 async function videoAnalyticsGet(this: IExecuteFunctions, itemIndex: number) {
@@ -886,17 +860,9 @@ async function videoAnalyticsExport(this: IExecuteFunctions, itemIndex: number) 
 		payload.accountUsername = exportBody.accountUsername;
 	}
 
-	if (Array.isArray(exportBody.platforms) && exportBody.platforms.length) {
-		payload.platforms = exportBody.platforms;
-	}
-
-	if (Array.isArray(exportBody.accounts) && exportBody.accounts.length) {
-		payload.accounts = exportBody.accounts;
-	}
-
-	if (Array.isArray(exportBody.projects) && exportBody.projects.length) {
-		payload.projects = exportBody.projects;
-	}
+	payload.platforms = toIdArray(exportBody.platforms);
+	payload.accounts = toIdArray(exportBody.accounts);
+	payload.projects = toIdArray(exportBody.projects);
 
 	if (Array.isArray(exportBody.contentTypes) && exportBody.contentTypes.length) {
 		payload.contentTypes = exportBody.contentTypes;
@@ -932,38 +898,18 @@ async function videoAnalyticsExport(this: IExecuteFunctions, itemIndex: number) 
 }
 
 async function videoAnalyticsGetExcluded(this: IExecuteFunctions, itemIndex: number) {
-	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
 
 	const query: IDataObject = cleanEmpty({
 		search: filters.search,
 		platforms: filters.platforms,
-		accounts: filters.accounts,
+		accounts: toIdArray(filters.accounts),
 		sortCol: filters.sortCol,
 		sortDir: filters.sortDir,
 	});
 
-	let items: IDataObject[];
-
-	if (returnAll) {
-		items = await viralAppApiRequestAllItems.call(this, 'GET', '/videos/excluded', {}, query);
-	} else {
-		const limit = getLimit.call(this, itemIndex);
-		const response = await viralAppApiRequest.call(
-			this,
-			'GET',
-			'/videos/excluded',
-			{},
-			{ ...query, page: 1, perPage: limit },
-		);
-		const data = Array.isArray(response?.data) ? response.data : [];
-		items = (data as IDataObject[]).slice(0, limit);
-	}
-
-	if (!Array.isArray(items)) {
-		items = [];
-	}
+	const items = await fetchCollection.call(this, '/videos/excluded', itemIndex, query);
 
 	if (!simplify) {
 		return items;
@@ -1071,8 +1017,8 @@ async function videoAnalyticsRestoreExcluded(this: IExecuteFunctions, itemIndex:
 function buildGeneralFilters(filters: IDataObject): IDataObject {
 	const query: IDataObject = cleanEmpty({
 		platforms: filters.platforms,
-		projects: filters.projects,
-		accounts: filters.accounts,
+		projects: toIdArray(filters.projects),
+		accounts: toIdArray(filters.accounts),
 		contentTypes: filters.contentTypes,
 		limit: filters.limit,
 		metric: filters.metric,

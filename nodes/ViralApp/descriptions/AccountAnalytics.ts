@@ -17,45 +17,12 @@ export const accountAnalyticsOperations: INodeProperties[] = [
 				value: 'getAll',
 				description: 'List many accounts with analytics',
 				action: 'List all accounts with analytics',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/accounts',
-						qs: {
-							page: '={{$parameter.returnAll ? ($pageCount || 0) + 1 : $parameter.page}}',
-							perPage: '={{$parameter.returnAll ? 100 : $parameter.limit}}',
-						},
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: {
-									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									pageCount: '={{$response.body.pageCount}}',
-									totalRows: '={{$response.body.totalRows}}',
-								},
-							},
-						],
-					},
-				},
 			},
 			{
 				name: 'Export',
 				value: 'export',
 				description: 'Export accounts to CSV',
 				action: 'Export accounts to CSV',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/accounts/export',
-					},
-				},
 			},
 		],
 		default: 'getAll',
@@ -119,12 +86,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				default: [],
 				description:
 					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'accounts',
-					},
-				},
 			},
 			{
 				displayName: 'Content Types',
@@ -214,12 +175,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				default: [],
 				description:
 					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'projects',
-					},
-				},
 			},
 			{
 				displayName: 'Search',
