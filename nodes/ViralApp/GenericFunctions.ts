@@ -9,7 +9,7 @@ import {
 	JsonObject,
 } from 'n8n-workflow';
 
-const BASE_URL = (process.env.VIRALAPP_BASE_URL || 'https://viral.app/api/v1').replace(/\/$/, '');
+import { resolveBaseUrl } from './baseUrl';
 
 /**
  * Make an authenticated API request to ViralApp
@@ -25,9 +25,13 @@ export async function viralAppApiRequest(
 	const sanitizedBody = body ? cleanEmpty(body) : {};
 
 	const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+	await this.getCredentials('viralAppApi');
+	const baseUrl = resolveBaseUrl();
+
 	const options: IHttpRequestOptions = {
 		method,
-		url: `${BASE_URL}${path}`,
+		url: `${baseUrl}${path}`,
 		qs: sanitizedQuery,
 		json: true,
 		headers: {},

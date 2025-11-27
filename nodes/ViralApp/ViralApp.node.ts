@@ -11,6 +11,7 @@ import {
 } from 'n8n-workflow';
 
 import { viralAppApiRequest } from './GenericFunctions';
+import { resolveBaseUrl } from './baseUrl';
 import { operationHandlers } from './operations';
 
 import { trackedAccountsOperations, trackedAccountsFields } from './descriptions/TrackedAccounts';
@@ -51,7 +52,7 @@ class ViralAppV1 implements INodeType {
 			},
 		],
 		requestDefaults: {
-			baseURL: (process.env.VIRALAPP_BASE_URL || 'https://viral.app/api/v1').replace(/\/$/, ''),
+			baseURL: resolveBaseUrl(),
 			json: true,
 		},
 		hints: [
@@ -224,6 +225,38 @@ class ViralAppV1 implements INodeType {
 					description: `${account.followerCount || 0} followers`,
 				}));
 			},
+
+			async getExcludedVideos(this: ILoadOptionsFunctions) {
+				const mapResults = (data: IDataObject[]) =>
+					data.map((item: IDataObject) => {
+						const labelParts = [
+							item.platformVideoId,
+							item.username ? `· ${item.username}` : '',
+							item.platform ? `(${item.platform})` : '',
+						].join(' ');
+
+						return {
+							name: labelParts.trim() || (item.id as string),
+							value: item.id as string,
+							description: item.platformVideoId as string,
+						};
+					});
+
+				const query: IDataObject = { page: 1, perPage: 50 };
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/videos/excluded',
+					{},
+					query,
+				);
+
+				if (Array.isArray(response?.data)) {
+					return mapResults(response.data as IDataObject[]);
+				}
+
+				return [];
+			},
 		},
 
 		listSearch: {
@@ -271,6 +304,13 @@ class ViralAppV1 implements INodeType {
 					perPage,
 				};
 
+				const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
+				if (!selectedPlatform) {
+					return { results: [], paginationToken: undefined };
+				}
+
+				query.platforms = [selectedPlatform];
+
 				// Add username filter if provided
 				if (filter) {
 					query.username = filter;
@@ -307,14 +347,38 @@ class ViralAppV1 implements INodeType {
 					perPage,
 				};
 
+				// Require platform at top-level
 				const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
 				const platform =
 					typeof selectedPlatform === 'string' && selectedPlatform.trim().length > 0
 						? selectedPlatform.trim().toLowerCase()
 						: undefined;
 
-				if (platform) {
-					query.platforms = [platform];
+				if (!platform) {
+					return { results: [], paginationToken: undefined };
+				}
+
+				// Optional org account filter (used by exclude flow)
+				const selectedOrgAccount = this.getCurrentNodeParameter('orgAccountId') as
+					| string
+					| IDataObject
+					| undefined;
+				let orgAccountId: string | undefined;
+
+				if (typeof selectedOrgAccount === 'string') {
+					orgAccountId = selectedOrgAccount;
+				} else if (
+					selectedOrgAccount &&
+					typeof selectedOrgAccount === 'object' &&
+					'value' in selectedOrgAccount &&
+					typeof (selectedOrgAccount as IDataObject).value === 'string'
+				) {
+					orgAccountId = ((selectedOrgAccount as IDataObject).value as string).trim() || undefined;
+				}
+
+				query.platforms = [platform];
+				if (orgAccountId) {
+					query.accounts = [orgAccountId];
 				}
 
 				if (filter) {

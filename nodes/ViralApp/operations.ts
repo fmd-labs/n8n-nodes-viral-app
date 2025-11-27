@@ -58,6 +58,9 @@ export const operationHandlers: Record<string, HandlerMap> = {
 		getHistory: videoAnalyticsGetHistory,
 		getActivity: videoAnalyticsGetActivity,
 		export: videoAnalyticsExport,
+		getExcluded: videoAnalyticsGetExcluded,
+		exclude: videoAnalyticsExclude,
+		restoreExcluded: videoAnalyticsRestoreExcluded,
 	},
 };
 
@@ -926,6 +929,129 @@ async function videoAnalyticsExport(this: IExecuteFunctions, itemIndex: number) 
 	)) as IDataObject;
 
 	return toBinaryExport.call(this, response, 'videos-export.csv');
+}
+
+async function videoAnalyticsGetExcluded(this: IExecuteFunctions, itemIndex: number) {
+	const returnAll = this.getNodeParameter('returnAll', itemIndex) as boolean;
+	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
+	const simplify = getSimplifyFlag.call(this, itemIndex);
+
+	const query: IDataObject = cleanEmpty({
+		search: filters.search,
+		platforms: filters.platforms,
+		accounts: filters.accounts,
+		sortCol: filters.sortCol,
+		sortDir: filters.sortDir,
+	});
+
+	let items: IDataObject[];
+
+	if (returnAll) {
+		items = await viralAppApiRequestAllItems.call(this, 'GET', '/videos/excluded', {}, query);
+	} else {
+		const limit = getLimit.call(this, itemIndex);
+		const response = await viralAppApiRequest.call(
+			this,
+			'GET',
+			'/videos/excluded',
+			{},
+			{ ...query, page: 1, perPage: limit },
+		);
+		const data = Array.isArray(response?.data) ? response.data : [];
+		items = (data as IDataObject[]).slice(0, limit);
+	}
+
+	if (!Array.isArray(items)) {
+		items = [];
+	}
+
+	if (!simplify) {
+		return items;
+	}
+
+	return items.map((item) =>
+		cleanEmpty({
+			id: item.id,
+			orgAccountId: item.orgAccountId,
+			platform: item.platform,
+			platformAccountId: item.platformAccountId,
+			platformVideoId: item.platformVideoId,
+			username: item.username,
+			accountDisplayName: item.accountDisplayName,
+			createdAt: item.createdAt,
+			actorType: item.actorType,
+		}),
+	);
+}
+
+async function videoAnalyticsExclude(this: IExecuteFunctions, itemIndex: number) {
+	const platform = this.getNodeParameter('platform', itemIndex) as string;
+	const orgAccountId = this.getNodeParameter('orgAccountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
+	const platformVideoIdRaw = this.getNodeParameter('platformVideoId', itemIndex) as
+		| string
+		| IDataObject;
+
+	const extractVideoId = (value: unknown): string | undefined => {
+		if (typeof value === 'string') {
+			return value.trim() || undefined;
+		}
+		if (typeof value === 'object' && value !== null) {
+			const modeValue = (value as IDataObject).value;
+			if (typeof modeValue === 'string') {
+				return modeValue.trim() || undefined;
+			}
+		}
+		return undefined;
+	};
+
+	const platformVideoId = extractVideoId(platformVideoIdRaw);
+
+	if (!platformVideoId) {
+		throw new NodeOperationError(this.getNode(), 'Platform Video ID is required.');
+	}
+
+	let platformAccountId: string | undefined = undefined;
+
+	// Resolve platformAccountId from video details
+	const videoDetails = (await viralAppApiRequest.call(
+		this,
+		'GET',
+		`/videos/${platform}/${platformVideoId}`,
+	)) as IDataObject;
+
+	if (typeof videoDetails.platformAccountId === 'string') {
+		platformAccountId = videoDetails.platformAccountId;
+	}
+
+	if (!platformAccountId) {
+		throw new NodeOperationError(
+			this.getNode(),
+			'Platform Account ID could not be inferred from the selected video.',
+		);
+	}
+
+	return viralAppApiRequest.call(this, 'POST', '/videos/excluded', {
+		entries: [
+			cleanEmpty({
+				orgAccountId,
+				platform,
+				platformAccountId,
+				platformVideoId,
+			}),
+		],
+	});
+}
+
+async function videoAnalyticsRestoreExcluded(this: IExecuteFunctions, itemIndex: number) {
+	const excludedId = (this.getNodeParameter('excludedVideoId', itemIndex) as string).trim();
+
+	if (!excludedId) {
+		throw new NodeOperationError(this.getNode(), 'Excluded video ID is required.');
+	}
+
+	return viralAppApiRequest.call(this, 'DELETE', '/videos/excluded', { ids: [excludedId] });
 }
 
 function buildGeneralFilters(filters: IDataObject): IDataObject {

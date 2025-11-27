@@ -19,6 +19,12 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 				action: 'Download video',
 			},
 			{
+				name: 'Exclude',
+				value: 'exclude',
+				description: 'Exclude videos from analytics',
+				action: 'Exclude videos from analytics',
+			},
+			{
 				name: 'Export',
 				value: 'export',
 				description: 'Export videos to CSV',
@@ -41,6 +47,12 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 				value: 'getActivity',
 				description: 'Get video activity timeline',
 				action: 'Get video activity timeline',
+			},
+			{
+				name: 'Get Excluded',
+				value: 'getExcluded',
+				description: 'List excluded videos',
+				action: 'List excluded videos',
 			},
 			{
 				name: 'Get History',
@@ -86,6 +98,12 @@ export const videoAnalyticsOperations: INodeProperties[] = [
 						],
 					},
 				},
+			},
+			{
+				name: 'Restore Excluded',
+				value: 'restoreExcluded',
+				description: 'Restore previously excluded videos',
+				action: 'Restore excluded videos',
 			},
 		],
 		default: 'getAll',
@@ -433,6 +451,286 @@ export const videoAnalyticsFields: INodeProperties[] = [
 		description:
 			'Select related resources to expand in the response (Stripe-style expand). Leave empty to return IDs only.',
 		hint: 'Expanded responses include nested objects and increase payload size.',
+	},
+
+	// ----------------------------------------
+	//      videoAnalytics: getExcluded
+	// ----------------------------------------
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getExcluded'],
+			},
+		},
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getExcluded'],
+				returnAll: [false],
+			},
+		},
+		typeOptions: {
+			minValue: 1,
+		},
+		default: 50,
+		description: 'Max number of results to return',
+	},
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'collection',
+		placeholder: 'Add Filter',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['getExcluded'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Account Names or IDs',
+				name: 'accounts',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+				},
+				default: [],
+				description:
+					'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'accounts',
+					},
+				},
+			},
+			{
+				displayName: 'Platforms',
+				name: 'platforms',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Instagram',
+						value: 'instagram',
+					},
+					{
+						name: 'TikTok',
+						value: 'tiktok',
+					},
+					{
+						name: 'YouTube',
+						value: 'youtube',
+					},
+				],
+				default: [],
+				description: 'Filter by social media platforms',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'platforms',
+					},
+				},
+			},
+			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search by video ID or account username',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'search',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Column',
+				name: 'sortCol',
+				type: 'options',
+				options: [
+					{
+						name: 'Published At',
+						value: 'publishedAt',
+					},
+					{
+						name: 'View Count',
+						value: 'viewCount',
+					},
+					{
+						name: 'Engagement Rate',
+						value: 'engagementRate',
+					},
+				],
+				default: 'publishedAt',
+				description: 'Column to sort by',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortCol',
+					},
+				},
+			},
+			{
+				displayName: 'Sort Direction',
+				name: 'sortDir',
+				type: 'options',
+				options: [
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+				default: 'desc',
+				description: 'Direction to sort the results',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'sortDir',
+					},
+				},
+			},
+		],
+	},
+
+	// ----------------------------------------
+	//      videoAnalytics: exclude
+	// ----------------------------------------
+	{
+		displayName: 'Platform',
+		name: 'platform',
+		type: 'options',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['exclude'],
+			},
+		},
+		options: [
+			{
+				name: 'Instagram',
+				value: 'instagram',
+			},
+			{
+				name: 'TikTok',
+				value: 'tiktok',
+			},
+			{
+				name: 'YouTube',
+				value: 'youtube',
+			},
+		],
+		default: 'tiktok',
+		required: true,
+		description: 'Social media platform',
+	},
+	{
+		displayName: 'Org Account',
+		name: 'orgAccountId',
+		type: 'resourceLocator',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['exclude'],
+			},
+		},
+		default: { mode: 'list', value: '' },
+		required: true,
+		description: 'Organization account ID (orgacc_...)',
+		typeOptions: {
+			loadOptionsDependsOn: ['platform'],
+		},
+		extractValue: {
+			type: 'regex',
+			regex: '^orgacc_[A-Za-z0-9]+',
+		},
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'trackedAccountSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'orgacc_123',
+			},
+		],
+	},
+	{
+		displayName: 'Video',
+		name: 'platformVideoId',
+		type: 'resourceLocator',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['exclude'],
+			},
+		},
+		default: { mode: 'list', value: '' },
+		required: true,
+		typeOptions: {
+			loadOptionsDependsOn: ['platform', 'orgAccountId'],
+		},
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a video...',
+				typeOptions: {
+					searchListMethod: 'videoSearch',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'Enter platform-specific video ID',
+			},
+		],
+		description: 'Video to exclude from analytics',
+	},
+
+	// ----------------------------------------
+	//      videoAnalytics: restoreExcluded
+	// ----------------------------------------
+	{
+		displayName: 'Excluded Video ID',
+		name: 'excludedVideoId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: ['videoAnalytics'],
+				operation: ['restoreExcluded'],
+			},
+		},
+		default: '',
+		required: true,
+		description: 'Excluded video ID (excv_abc123)',
+		placeholder: 'excv_abc123',
 	},
 	// ----------------------------------------
 	//      videoAnalytics: getActivity

@@ -5,6 +5,8 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
+import { VIRALAPP_BASE_URL_EXPRESSION } from '../nodes/ViralApp/baseUrl';
+
 export class ViralAppApi implements ICredentialType {
 	name = 'viralAppApi';
 	displayName = 'ViralApp API';
@@ -34,7 +36,7 @@ export class ViralAppApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://viral.app/api/v1',
+			baseURL: VIRALAPP_BASE_URL_EXPRESSION,
 			url: '/accounts/tracked/count',
 			method: 'GET',
 		},
