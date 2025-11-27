@@ -52,6 +52,7 @@ class ViralAppV1 implements INodeType {
 			},
 		],
 		requestDefaults: {
+			baseURL: resolveBaseUrl(),
 			json: true,
 		},
 		hints: [
