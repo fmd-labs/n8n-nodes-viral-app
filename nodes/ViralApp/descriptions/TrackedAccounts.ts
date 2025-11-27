@@ -170,19 +170,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Username',
-				name: 'username',
-				type: 'string',
-				default: '',
-				description: 'Filter by account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'username',
-					},
-				},
-			},
-			{
 				displayName: 'Platforms',
 				name: 'platforms',
 				type: 'multiOptions',
@@ -300,6 +287,19 @@ export const trackedAccountsFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'sortDir',
+					},
+				},
+			},
+			{
+				displayName: 'Username',
+				name: 'username',
+				type: 'string',
+				default: '',
+				description: 'Filter by account username',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'username',
 					},
 				},
 			},
