@@ -193,43 +193,17 @@ class ViralAppV1 implements INodeType {
 				filter?: string,
 				paginationToken?: string,
 			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 20;
-
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-
-				if (filter) {
-					query.username = filter;
-				}
-
-				const response = await this.helpers.httpRequestWithAuthentication.call(this, 'viralAppApi', {
-					method: 'GET',
-					url: `${resolveBaseUrl()}/accounts`,
-					qs: query,
-					json: true,
-				});
-
-				const platformDisplay: { [key: string]: string } = {
-					tiktok: 'TikTok',
-					instagram: 'Instagram',
-					youtube: 'YouTube',
-				};
-
-				const data = Array.isArray(response?.data) ? response.data : [];
-
-				return {
-					results: data.map((account: IDataObject) => ({
-						name: `${account.username} (${
-							platformDisplay[account.platform as string] || account.platform
-						})`,
+				return fetchListSearch.call(
+					this,
+					'/accounts',
+					{ search: filter },
+					(account) => ({
+						name: `${account.username} (${PLATFORM_DISPLAY[account.platform as string] || account.platform})`,
 						value: account.id as string,
 						description: `${account.followerCount || 0} followers`,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
+					}),
+					paginationToken,
+				);
 			},
 
 			async projectSearch(
@@ -237,30 +211,16 @@ class ViralAppV1 implements INodeType {
 				filter?: string,
 				paginationToken?: string,
 			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 20; // Reasonable page size for search
-
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-
-				// Add search filter if provided
-				if (filter) {
-					query.name = filter;
-				}
-
-				const response = await viralAppApiRequest.call(this, 'GET', '/projects', {}, query);
-
-				return {
-					results: response.data.map((project: IDataObject) => ({
+				return fetchListSearch.call(
+					this,
+					'/projects',
+					{ name: filter },
+					(project) => ({
 						name: project.name as string,
 						value: project.id as string,
-						// Optional: add description if available
-						// description: project.description as string,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
+					}),
+					paginationToken,
+				);
 			},
 
 			async trackedAccountSearch(
@@ -268,40 +228,27 @@ class ViralAppV1 implements INodeType {
 				filter?: string,
 				paginationToken?: string,
 			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 20; // Reasonable page size for search
-
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-
 				const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
+
+				const baseQuery: IDataObject = {};
 				if (selectedPlatform) {
-					query.platforms = [selectedPlatform];
+					baseQuery.platforms = [selectedPlatform];
 				}
 
-				// Server-side search matches openapi `search` param
 				if (filter) {
-					query.search = filter;
+					baseQuery.search = filter;
 				}
 
-				const response = await viralAppApiRequest.call(this, 'GET', '/accounts', {}, query);
-
-				// Map platform values to display names
-				const platformDisplay: { [key: string]: string } = {
-					tiktok: 'TikTok',
-					instagram: 'Instagram',
-					youtube: 'YouTube',
-				};
-
-				return {
-					results: (Array.isArray(response.data) ? response.data : []).map((account: IDataObject) => ({
-						name: `${account.username} (${platformDisplay[account.platform as string] || account.platform})`,
+				return fetchListSearch.call(
+					this,
+					'/accounts',
+					baseQuery,
+					(account) => ({
+						name: `${account.username} (${PLATFORM_DISPLAY[account.platform as string] || account.platform})`,
 						value: account.id as string,
-					})),
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
+					}),
+					paginationToken,
+				);
 			},
 
 			async videoSearch(
@@ -309,15 +256,6 @@ class ViralAppV1 implements INodeType {
 				filter?: string,
 				paginationToken?: string,
 			): Promise<INodeListSearchResult> {
-				const page = paginationToken ? parseInt(paginationToken, 10) : 1;
-				const perPage = 100; // pull a wider slice so client-side filtering can work
-
-				const query: IDataObject = {
-					page,
-					perPage,
-				};
-
-				// Require platform at top-level
 				const selectedPlatform = this.getCurrentNodeParameter('platform') as string | undefined;
 				const platform =
 					typeof selectedPlatform === 'string' && selectedPlatform.trim().length > 0
@@ -328,49 +266,26 @@ class ViralAppV1 implements INodeType {
 					return { results: [], paginationToken: undefined };
 				}
 
-				// Optional org account filter (used by exclude flow)
 				const selectedOrgAccount = this.getCurrentNodeParameter('orgAccountId') as
 					| string
 					| IDataObject
 					| undefined;
-				let orgAccountId: string | undefined;
 
-				if (typeof selectedOrgAccount === 'string') {
-					orgAccountId = selectedOrgAccount;
-				} else if (
-					selectedOrgAccount &&
-					typeof selectedOrgAccount === 'object' &&
-					'value' in selectedOrgAccount &&
-					typeof (selectedOrgAccount as IDataObject).value === 'string'
-				) {
-					orgAccountId = ((selectedOrgAccount as IDataObject).value as string).trim() || undefined;
-				}
+				const orgAccountId = extractLocatorId(selectedOrgAccount);
 
-				query.platforms = [platform];
+				const baseQuery: IDataObject = {
+					platforms: [platform],
+				};
+
 				if (orgAccountId) {
-					query.accounts = [orgAccountId];
+					baseQuery.accounts = [orgAccountId];
 				}
 
-				if (filter) {
-					query.search = filter;
-				}
-
-				const response = await viralAppApiRequest.call(this, 'GET', '/videos', {}, query);
-
-				const filterText = filter?.toLowerCase().trim();
-				const data = Array.isArray(response.data) ? response.data : [];
-
-				const filtered = filterText
-					? data.filter((video: IDataObject) => {
-						const id = typeof video.platformVideoId === 'string' ? video.platformVideoId.toLowerCase() : '';
-						const title = typeof video.title === 'string' ? video.title.toLowerCase() : '';
-						const account = typeof video.accountUsername === 'string' ? video.accountUsername.toLowerCase() : '';
-						return id.includes(filterText) || title.includes(filterText) || account.includes(filterText);
-					})
-					: data;
-
-				const results = filtered
-					.map((video: IDataObject) => {
+				return fetchListSearch.call(
+					this,
+					'/videos',
+					baseQuery,
+					(video) => {
 						const videoId = getVideoId(video);
 						if (!videoId) {
 							return null;
@@ -379,17 +294,10 @@ class ViralAppV1 implements INodeType {
 							name: buildVideoDisplayName(video, videoId),
 							value: videoId,
 						};
-					})
-					.filter(
-						(
-							entry: { name: string; value: string } | null,
-						): entry is { name: string; value: string } => entry !== null,
-					);
-
-				return {
-					results,
-					paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
-				};
+					},
+					paginationToken,
+					(video) => videoMatchesFilter(video, filter),
+				);
 			},
 		},
 	};
@@ -465,6 +373,68 @@ export class ViralApp extends VersionedNodeType {
 			node.description,
 		);
 	}
+}
+
+const PLATFORM_DISPLAY: { [key: string]: string } = {
+	tiktok: 'TikTok',
+	instagram: 'Instagram',
+	youtube: 'YouTube',
+};
+
+async function fetchListSearch(
+	this: ILoadOptionsFunctions,
+	endpoint: string,
+	baseQuery: IDataObject,
+	mapFn: (item: IDataObject) => { name: string; value: string; description?: string } | null,
+	paginationToken?: string,
+	filterFn?: (item: IDataObject) => boolean,
+): Promise<INodeListSearchResult> {
+	const page = paginationToken ? parseInt(paginationToken, 10) : 1;
+	const perPage = 100;
+
+	const query = {
+		...baseQuery,
+		page,
+		perPage,
+	};
+
+	const response = await viralAppApiRequest.call(this, 'GET', endpoint, {}, query);
+	const data = Array.isArray(response?.data) ? (response.data as IDataObject[]) : [];
+	const filtered = filterFn ? data.filter(filterFn) : data;
+
+	const results = filtered
+		.map(mapFn)
+		.filter((entry): entry is { name: string; value: string; description?: string } => entry !== null);
+
+	return {
+		results,
+		paginationToken: response.pageCount > page ? (page + 1).toString() : undefined,
+	};
+}
+
+function extractLocatorId(value: string | IDataObject | undefined): string | undefined {
+	if (typeof value === 'string') {
+		const trimmed = value.trim();
+		return trimmed || undefined;
+	}
+
+	if (value && typeof value === 'object' && 'value' in value && typeof (value as IDataObject).value === 'string') {
+		const trimmed = ((value as IDataObject).value as string).trim();
+		return trimmed || undefined;
+	}
+
+	return undefined;
+}
+
+function videoMatchesFilter(video: IDataObject, filter?: string): boolean {
+	const filterText = filter?.toLowerCase().trim();
+	if (!filterText) return true;
+
+	const id = typeof video.platformVideoId === 'string' ? video.platformVideoId.toLowerCase() : '';
+	const title = typeof video.title === 'string' ? video.title.toLowerCase() : '';
+	const account = typeof video.accountUsername === 'string' ? video.accountUsername.toLowerCase() : '';
+
+	return id.includes(filterText) || title.includes(filterText) || account.includes(filterText);
 }
 
 function getVideoId(video: IDataObject): string | undefined {
