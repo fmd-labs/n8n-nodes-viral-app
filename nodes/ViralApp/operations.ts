@@ -98,7 +98,8 @@ function toId(value: unknown): string | undefined {
 	}
 
 	if (typeof value === 'object' && value !== null) {
-		const candidate = (value as IDataObject).value ?? (value as IDataObject).id ?? (value as IDataObject).name;
+		const candidate =
+			(value as IDataObject).value ?? (value as IDataObject).id ?? (value as IDataObject).name;
 		if (typeof candidate === 'string') {
 			const trimmed = candidate.trim();
 			return trimmed || undefined;
@@ -114,9 +115,7 @@ function toIdArray(raw: unknown): string[] | undefined {
 	}
 
 	const values = Array.isArray(raw) ? raw : [raw];
-	const ids = values
-		.map((entry) => toId(entry))
-		.filter((entry): entry is string => !!entry);
+	const ids = values.map((entry) => toId(entry)).filter((entry): entry is string => !!entry);
 
 	return ids.length ? ids : undefined;
 }
@@ -441,7 +440,11 @@ async function fetchCollection(
 			{},
 			{ ...query, page: 1, perPage: limit },
 		);
-		const data = Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : [];
+		const data = Array.isArray(response?.data)
+			? response.data
+			: Array.isArray(response)
+				? response
+				: [];
 		items = (data as IDataObject[]).slice(0, limit);
 	}
 
@@ -474,7 +477,13 @@ async function accountAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number
 		query.sortDir = filters.sortDir;
 	}
 
-	return fetchCollection.call(this, '/accounts', itemIndex, query, simplify ? simplifyAccountAnalytics : undefined);
+	return fetchCollection.call(
+		this,
+		'/accounts',
+		itemIndex,
+		query,
+		simplify ? simplifyAccountAnalytics : undefined,
+	);
 }
 
 async function accountAnalyticsExport(this: IExecuteFunctions, itemIndex: number) {

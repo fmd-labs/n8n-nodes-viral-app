@@ -189,7 +189,13 @@ class ViralAppV1 implements INodeType {
 	methods = {
 		loadOptions: {
 			async getAccounts(this: ILoadOptionsFunctions) {
-				const response = await viralAppApiRequest.call(this, 'GET', '/accounts', {}, { page: 1, perPage: 100 });
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/accounts',
+					{},
+					{ page: 1, perPage: 100 },
+				);
 				const data = Array.isArray(response?.data) ? (response.data as IDataObject[]) : [];
 
 				return data.map((account) => ({
@@ -200,9 +206,18 @@ class ViralAppV1 implements INodeType {
 			},
 
 			async getProjects(this: ILoadOptionsFunctions) {
-				const response = await viralAppApiRequest.call(this, 'GET', '/projects', {}, { page: 1, perPage: 100 });
+				const response = await viralAppApiRequest.call(
+					this,
+					'GET',
+					'/projects',
+					{},
+					{ page: 1, perPage: 100 },
+				);
 				const data = Array.isArray(response?.data) ? (response.data as IDataObject[]) : [];
-				return data.map((project) => ({ name: project.name as string, value: project.id as string }));
+				return data.map((project) => ({
+					name: project.name as string,
+					value: project.id as string,
+				}));
 			},
 		},
 
@@ -423,7 +438,9 @@ async function fetchListSearch(
 
 	const results = filtered
 		.map(mapFn)
-		.filter((entry): entry is { name: string; value: string; description?: string } => entry !== null);
+		.filter(
+			(entry): entry is { name: string; value: string; description?: string } => entry !== null,
+		);
 
 	return {
 		results,
@@ -437,7 +454,12 @@ function extractLocatorId(value: string | IDataObject | undefined): string | und
 		return trimmed || undefined;
 	}
 
-	if (value && typeof value === 'object' && 'value' in value && typeof (value as IDataObject).value === 'string') {
+	if (
+		value &&
+		typeof value === 'object' &&
+		'value' in value &&
+		typeof (value as IDataObject).value === 'string'
+	) {
 		const trimmed = ((value as IDataObject).value as string).trim();
 		return trimmed || undefined;
 	}
@@ -451,7 +473,8 @@ function videoMatchesFilter(video: IDataObject, filter?: string): boolean {
 
 	const id = typeof video.platformVideoId === 'string' ? video.platformVideoId.toLowerCase() : '';
 	const title = typeof video.title === 'string' ? video.title.toLowerCase() : '';
-	const account = typeof video.accountUsername === 'string' ? video.accountUsername.toLowerCase() : '';
+	const account =
+		typeof video.accountUsername === 'string' ? video.accountUsername.toLowerCase() : '';
 
 	return id.includes(filterText) || title.includes(filterText) || account.includes(filterText);
 }

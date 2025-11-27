@@ -33,6 +33,10 @@ npm install n8n-nodes-viral-app
 
 The ViralApp node supports the following resources and operations:
 
+### Notes on dropdown search
+- Account and project pickers are searchable and accept direct IDs.
+- Video picker is client-filtered over the first 100 items (platform + optional account filter); type to narrow results.
+
 ### Account Data
 - **Get Top Videos** - Retrieve top performing videos for tracked accounts
 - **Get Top Accounts** - Get top performing accounts from your tracked list
@@ -136,6 +140,11 @@ pnpm lintfix
 [MIT](LICENSE.md)
 
 ## Version History
+
+### 0.2.8
+- Make all analytics account/project filters searchable via dropdown or direct ID.
+- Centralize list searches with pagination and perPage=100; video picker still client-filters due to API limitations.
+- Restore baseURL defaults for safer relative requests.
 
 ### 0.2.4
 - Align all ViralApp node sort options with the ViralApp dashboard by adding the latest sortable columns for tracked videos, accounts, integrations, and analytics exports

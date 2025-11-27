@@ -122,11 +122,27 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				type: 'resourceLocator',
 				default: { mode: 'list', value: '' },
 				modes: [
-					{ displayName: 'List', name: 'list', type: 'list', typeOptions: { searchListMethod: 'accountSearch' } },
+					{
+						displayName: 'List',
+						name: 'list',
+						type: 'list',
+						typeOptions: { searchListMethod: 'accountSearch' },
+					},
 					{ displayName: 'ID', name: 'id', type: 'string' },
 				],
-				description: 'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-				displayOptions: { show: { '/operation': ['getKpis', 'getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'exportDailyGains'] } },
+				description:
+					'Filter by specific accounts. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				displayOptions: {
+					show: {
+						'/operation': [
+							'getKpis',
+							'getTopVideos',
+							'getTopAccounts',
+							'getInteractionMetrics',
+							'exportDailyGains',
+						],
+					},
+				},
 				routing: { send: { type: 'query', property: 'accounts' } },
 			},
 			{
@@ -380,18 +396,23 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					},
 				},
 			},
-		{
-			displayName: 'Project Names or IDs',
-			name: 'projects',
-			type: 'resourceLocator',
-			default: { mode: 'list', value: '' },
-			modes: [
-				{ displayName: 'List', name: 'list', type: 'list', typeOptions: { searchListMethod: 'projectSearch' } },
-				{ displayName: 'ID', name: 'id', type: 'string' },
-			],
-			description:
-				'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-		},
+			{
+				displayName: 'Project Names or IDs',
+				name: 'projects',
+				type: 'resourceLocator',
+				default: { mode: 'list', value: '' },
+				modes: [
+					{
+						displayName: 'List',
+						name: 'list',
+						type: 'list',
+						typeOptions: { searchListMethod: 'projectSearch' },
+					},
+					{ displayName: 'ID', name: 'id', type: 'string' },
+				],
+				description:
+					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			},
 		],
 	},
 ];
