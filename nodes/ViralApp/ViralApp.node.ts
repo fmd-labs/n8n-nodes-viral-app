@@ -187,6 +187,25 @@ class ViralAppV1 implements INodeType {
 	};
 
 	methods = {
+		loadOptions: {
+			async getAccounts(this: ILoadOptionsFunctions) {
+				const response = await viralAppApiRequest.call(this, 'GET', '/accounts', {}, { page: 1, perPage: 100 });
+				const data = Array.isArray(response?.data) ? (response.data as IDataObject[]) : [];
+
+				return data.map((account) => ({
+					name: `${account.username} (${PLATFORM_DISPLAY[account.platform as string] || account.platform})`,
+					value: account.id as string,
+					description: `${account.followerCount || 0} followers`,
+				}));
+			},
+
+			async getProjects(this: ILoadOptionsFunctions) {
+				const response = await viralAppApiRequest.call(this, 'GET', '/projects', {}, { page: 1, perPage: 100 });
+				const data = Array.isArray(response?.data) ? (response.data as IDataObject[]) : [];
+				return data.map((project) => ({ name: project.name as string, value: project.id as string }));
+			},
+		},
+
 		listSearch: {
 			async accountSearch(
 				this: ILoadOptionsFunctions,
