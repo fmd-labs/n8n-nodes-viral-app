@@ -7,7 +7,6 @@ import {
 	ILoadOptionsFunctions,
 	INodeListSearchResult,
 	NodeOperationError,
-	VersionedNodeType,
 } from 'n8n-workflow';
 
 import { viralAppApiRequest } from './GenericFunctions';
@@ -31,7 +30,7 @@ import {
 import { projectsOperations, projectsFields } from './descriptions/Projects';
 import { integrationsOperations, integrationsFields } from './descriptions/Integrations';
 
-class ViralAppV1 implements INodeType {
+export class ViralApp implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ViralApp',
 		name: 'viralApp',
@@ -394,18 +393,6 @@ class ViralAppV1 implements INodeType {
 		}
 
 		return [returnData];
-	}
-}
-
-export class ViralApp extends VersionedNodeType {
-	constructor() {
-		const node = new ViralAppV1();
-		super(
-			{
-				1: node,
-			},
-			node.description,
-		);
 	}
 }
 
