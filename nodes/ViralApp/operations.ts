@@ -24,6 +24,7 @@ export const operationHandlers: Record<string, HandlerMap> = {
 		getTopVideos: generalAnalyticsGetTopVideos,
 		getTopAccounts: generalAnalyticsGetTopAccounts,
 		getInteractionMetrics: generalAnalyticsGetInteractionMetrics,
+		getTopCreators: generalAnalyticsGetTopCreators,
 		exportDailyGains: generalAnalyticsExportDailyGains,
 	},
 	integrations: {
@@ -45,6 +46,8 @@ export const operationHandlers: Record<string, HandlerMap> = {
 		updateMaxVideos: trackedAccountsUpdateMaxVideos,
 		updateHashtags: trackedAccountsUpdateHashtags,
 		updateProjectHashtags: trackedAccountsUpdateProjectHashtags,
+		setCompetitor: trackedAccountsSetCompetitor,
+		setCompetitors: trackedAccountsSetCompetitors,
 	},
 	trackedIndividualVideos: {
 		getAll: trackedIndividualVideosGetAll,
@@ -191,6 +194,7 @@ function simplifyTrackedAccount(item: IDataObject): IDataObject {
 		platform: item.platform,
 		status: item.status,
 		maxVideos: item.maxVideos,
+		isCompetitor: item.isCompetitor,
 		lastSyncedAt: item.lastSyncedAt,
 		createdAt: item.createdAt,
 		videoCount: item.videoCount,
@@ -221,6 +225,17 @@ function simplifyProject(item: IDataObject): IDataObject {
 			: item.trackedAccountsCount,
 		createdAt: item.createdAt,
 	};
+}
+
+function applyViewMode(query: IDataObject, value: unknown): void {
+	const allowed = ['internal', 'competitors', 'all'];
+	if (typeof value === 'string' && allowed.includes(value)) {
+		query.viewMode = value;
+		return;
+	}
+
+	// Default to previous behaviour (internal accounts only) to avoid breaking changes.
+	query.viewMode = 'internal';
 }
 
 async function toBinaryExport(
@@ -477,6 +492,8 @@ async function accountAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number
 		query.sortDir = filters.sortDir;
 	}
 
+	applyViewMode(query, filters.viewMode);
+
 	return fetchCollection.call(
 		this,
 		'/accounts',
@@ -537,6 +554,8 @@ async function trackedAccountsGetAll(this: IExecuteFunctions, itemIndex: number)
 		sortDir: filters.sortDir,
 	});
 
+	applyViewMode(query, filters.viewMode);
+
 	return fetchCollection.call(
 		this,
 		'/accounts/tracked',
@@ -556,6 +575,8 @@ async function trackedAccountsAdd(this: IExecuteFunctions, itemIndex: number) {
 		throw new NodeOperationError(this.getNode(), 'At least one account must be provided.');
 	}
 
+	const isCompetitor = (accountsCollection[0]?.isCompetitor as boolean) ?? false;
+
 	const accounts = accountsCollection.map((raw) => {
 		const payload: IDataObject = {
 			platform: raw.platform,
@@ -566,7 +587,10 @@ async function trackedAccountsAdd(this: IExecuteFunctions, itemIndex: number) {
 		return cleanEmpty(payload);
 	});
 
-	return viralAppApiRequest.call(this, 'POST', '/accounts/tracked', { accounts });
+	return viralAppApiRequest.call(this, 'POST', '/accounts/tracked', {
+		accounts,
+		isCompetitor,
+	});
 }
 
 async function trackedAccountsGetCount(this: IExecuteFunctions, _itemIndex: number) {
@@ -665,6 +689,37 @@ async function trackedAccountsUpdateProjectHashtags(this: IExecuteFunctions, ite
 	});
 }
 
+async function trackedAccountsSetCompetitor(this: IExecuteFunctions, itemIndex: number) {
+	const accountId = this.getNodeParameter('accountId', itemIndex, undefined, {
+		extractValue: true,
+	}) as string;
+	const isCompetitor = this.getNodeParameter('isCompetitor', itemIndex) as boolean;
+
+	return viralAppApiRequest.call(this, 'PUT', `/accounts/tracked/${accountId}/competitor`, {
+		isCompetitor,
+	});
+}
+
+async function trackedAccountsSetCompetitors(this: IExecuteFunctions, itemIndex: number) {
+	const accountsCollection = this.getNodeParameter(
+		'bulkCompetitors.accounts',
+		itemIndex,
+		[],
+	) as IDataObject[];
+	const isCompetitor = this.getNodeParameter('bulkCompetitors.isCompetitor', itemIndex) as boolean;
+
+	const accountIds = accountsCollection
+		.map((entry) => toId((entry as IDataObject).accountId ?? entry))
+		.filter((id): id is string => !!id);
+
+	const body: IDataObject = { isCompetitor };
+	if (accountIds.length) {
+		body.accountIds = accountIds;
+	}
+
+	return viralAppApiRequest.call(this, 'PUT', '/accounts/tracked/competitor/bulk', body);
+}
+
 async function trackedIndividualVideosGetAll(this: IExecuteFunctions, itemIndex: number) {
 	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
 	const simplify = getSimplifyFlag.call(this, itemIndex);
@@ -675,6 +730,8 @@ async function trackedIndividualVideosGetAll(this: IExecuteFunctions, itemIndex:
 		sortCol: filters.sortCol,
 		sortDir: filters.sortDir,
 	});
+
+	applyViewMode(query, filters.viewMode);
 
 	return fetchCollection.call(
 		this,
@@ -807,6 +864,7 @@ async function videoAnalyticsGetAll(this: IExecuteFunctions, itemIndex: number) 
 	});
 
 	applyDateRangeFilter.call(this, query, filters.dateRangeFrom, filters.dateRangeTo);
+	applyViewMode(query, filters.viewMode);
 
 	const items = await fetchCollection.call(this, '/videos', itemIndex, query);
 
@@ -858,6 +916,7 @@ async function videoAnalyticsGetActivity(this: IExecuteFunctions, itemIndex: num
 		accounts: filters.accounts,
 		projects: filters.projects,
 	});
+	applyViewMode(query, filters.viewMode);
 	return viralAppApiRequest.call(this, 'GET', '/videos/activity', {}, query);
 }
 
@@ -933,6 +992,9 @@ async function videoAnalyticsGetExcluded(this: IExecuteFunctions, itemIndex: num
 			platformVideoId: item.platformVideoId,
 			username: item.username,
 			accountDisplayName: item.accountDisplayName,
+			caption: item.caption,
+			thumbnailUrl: item.thumbnailUrl,
+			contentType: item.contentType,
 			createdAt: item.createdAt,
 			actorType: item.actorType,
 		}),
@@ -1034,6 +1096,8 @@ function buildGeneralFilters(filters: IDataObject): IDataObject {
 		onlyPublished: filters.onlyPublished,
 	});
 
+	applyViewMode(query, filters.viewMode);
+
 	return query;
 }
 
@@ -1114,6 +1178,40 @@ async function generalAnalyticsGetTopAccounts(this: IExecuteFunctions, itemIndex
 		followerCount: item.followerCount,
 		totalVideos: item.totalVideos,
 		totalViews: item.totalViews,
+		engagementRate: item.engagementRate,
+	}));
+}
+
+async function generalAnalyticsGetTopCreators(this: IExecuteFunctions, itemIndex: number) {
+	const filters = (this.getNodeParameter('filters', itemIndex, {}) as IDataObject) || {};
+	const fromRaw = this.getNodeParameter('dateRangeFrom', itemIndex) as string;
+	const toRaw = this.getNodeParameter('dateRangeTo', itemIndex) as string;
+	const simplify = getSimplifyFlag.call(this, itemIndex);
+
+	const query = buildGeneralFilters(filters);
+	applyDateRangeFilter.call(this, query, fromRaw, toRaw);
+
+	const response = await viralAppApiRequest.call(
+		this,
+		'GET',
+		'/analytics/top-creators',
+		{},
+		query,
+	);
+
+	const items = Array.isArray(response) ? response : (response?.data ?? response);
+
+	if (!simplify || !Array.isArray(items)) {
+		return items;
+	}
+
+	return (items as IDataObject[]).map((item) => ({
+		id: item.id,
+		platform: item.platform,
+		username: item.username,
+		followerCount: item.followerCount,
+		totalViews: item.totalViews,
+		totalVideos: item.totalVideos,
 		engagementRate: item.engagementRate,
 	}));
 }

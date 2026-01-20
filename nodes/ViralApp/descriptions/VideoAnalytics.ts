@@ -379,6 +379,24 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				displayName: 'View Mode',
+				name: 'viewMode',
+				type: 'options',
+				options: [
+					{ name: 'All', value: 'all' },
+					{ name: 'Competitors', value: 'competitors' },
+					{ name: 'Internal Accounts', value: 'internal' },
+				],
+				default: 'internal',
+				description: 'Whether to include competitor videos',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'viewMode',
+					},
+				},
+			},
 		],
 	},
 	{
@@ -762,7 +780,25 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				},
 				default: [],
 				description:
-					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			},
+			{
+				displayName: 'View Mode',
+				name: 'viewMode',
+				type: 'options',
+				options: [
+					{ name: 'All', value: 'all' },
+					{ name: 'Competitors', value: 'competitors' },
+					{ name: 'Internal Accounts', value: 'internal' },
+				],
+				default: 'internal',
+				description: 'Whether to include competitor accounts in activity timelines',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'viewMode',
+					},
+				},
 			},
 		],
 	},

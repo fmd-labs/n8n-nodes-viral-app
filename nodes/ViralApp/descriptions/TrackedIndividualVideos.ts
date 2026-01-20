@@ -83,20 +83,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Search',
-				name: 'search',
-				type: 'string',
-				default: '',
-				description: 'Search videos by ID or title',
-				placeholder: 'e.g. video title or ID',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
-			},
-			{
 				displayName: 'Platforms',
 				name: 'platforms',
 				type: 'multiOptions',
@@ -120,6 +106,20 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'platforms',
+					},
+				},
+			},
+			{
+				displayName: 'Search',
+				name: 'search',
+				type: 'string',
+				default: '',
+				description: 'Search videos by ID or title',
+				placeholder: 'e.g. video title or ID',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'search',
 					},
 				},
 			},
@@ -185,6 +185,24 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 					send: {
 						type: 'query',
 						property: 'sortDir',
+					},
+				},
+			},
+			{
+				displayName: 'View Mode',
+				name: 'viewMode',
+				type: 'options',
+				options: [
+					{ name: 'All', value: 'all' },
+					{ name: 'Competitors', value: 'competitors' },
+					{ name: 'Internal Accounts', value: 'internal' },
+				],
+				default: 'internal',
+				description: 'Whether to include competitor videos',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'viewMode',
 					},
 				},
 			},

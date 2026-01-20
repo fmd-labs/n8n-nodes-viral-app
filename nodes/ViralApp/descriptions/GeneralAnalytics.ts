@@ -30,15 +30,21 @@ export const generalAnalyticsOperations: INodeProperties[] = [
 				description: 'Get key performance indicators',
 				action: 'Get key performance indicators',
 			},
-			{
-				name: 'Get Top Accounts',
-				value: 'getTopAccounts',
-				description: 'Get top performing accounts',
-				action: 'Get top performing accounts',
-			},
-			{
-				name: 'Get Top Videos',
-				value: 'getTopVideos',
+		{
+			name: 'Get Top Accounts',
+			value: 'getTopAccounts',
+			description: 'Get top performing accounts',
+			action: 'Get top performing accounts',
+		},
+		{
+			name: 'Get Top Creators',
+			value: 'getTopCreators',
+			description: 'Get top performing creators (accounts)',
+			action: 'Get top creators',
+		},
+		{
+			name: 'Get Top Videos',
+			value: 'getTopVideos',
 				description: 'Get top performing videos',
 				action: 'Get top performing videos',
 			},
@@ -65,6 +71,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					'getKpis',
 					'getTopVideos',
 					'getTopAccounts',
+					'getTopCreators',
 					'getInteractionMetrics',
 					'exportDailyGains',
 				],
@@ -86,6 +93,7 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					'getKpis',
 					'getTopVideos',
 					'getTopAccounts',
+					'getTopCreators',
 					'getInteractionMetrics',
 					'exportDailyGains',
 				],
@@ -110,21 +118,22 @@ export const generalAnalyticsFields: INodeProperties[] = [
 					'getKpis',
 					'getTopVideos',
 					'getTopAccounts',
+					'getTopCreators',
 					'getInteractionMetrics',
 					'exportDailyGains',
 				],
 			},
 		},
 		options: [
-			{
-				displayName: 'Account Names or IDs',
-				name: 'accounts',
+		{
+			displayName: 'Account Names or IDs',
+			name: 'accounts',
 				type: 'resourceLocator',
-				default: { mode: 'list', value: '' },
-				modes: [
-					{
-						displayName: 'List',
-						name: 'list',
+			default: { mode: 'list', value: '' },
+			modes: [
+				{
+					displayName: 'List',
+					name: 'list',
 						type: 'list',
 						typeOptions: { searchListMethod: 'accountSearch' },
 					},
@@ -138,13 +147,14 @@ export const generalAnalyticsFields: INodeProperties[] = [
 							'getKpis',
 							'getTopVideos',
 							'getTopAccounts',
+							'getTopCreators',
 							'getInteractionMetrics',
 							'exportDailyGains',
 						],
 					},
 				},
-				routing: { send: { type: 'query', property: 'accounts' } },
-			},
+			routing: { send: { type: 'query', property: 'accounts' } },
+		},
 			{
 				displayName: 'Content Types',
 				name: 'contentTypes',
@@ -161,11 +171,17 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by content types (video, slideshow)',
-				displayOptions: {
-					show: {
-						'/operation': ['getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'getKpis'],
-					},
+			displayOptions: {
+				show: {
+					'/operation': [
+						'getTopVideos',
+						'getTopAccounts',
+						'getTopCreators',
+						'getInteractionMetrics',
+						'getKpis',
+					],
 				},
+			},
 				routing: {
 					send: {
 						type: 'query',
@@ -177,11 +193,11 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
-				displayOptions: {
-					show: {
-						'/operation': ['getTopVideos', 'getTopAccounts'],
-					},
+			displayOptions: {
+				show: {
+					'/operation': ['getTopVideos', 'getTopAccounts', 'getTopCreators'],
 				},
+			},
 				typeOptions: {
 					minValue: 1,
 				},
@@ -409,10 +425,35 @@ export const generalAnalyticsFields: INodeProperties[] = [
 						typeOptions: { searchListMethod: 'projectSearch' },
 					},
 					{ displayName: 'ID', name: 'id', type: 'string' },
-				],
-				description:
-					'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			],
+			description:
+				'Filter by projects (select multiple). Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		},
+		{
+			displayName: 'View Mode',
+			name: 'viewMode',
+			type: 'options',
+			options: [
+				{ name: 'All', value: 'all' },
+				{ name: 'Competitors', value: 'competitors' },
+				{ name: 'Internal Accounts', value: 'internal' },
+			],
+			default: 'internal',
+			description: 'Whether to include competitor data in analytics results',
+			displayOptions: {
+				show: {
+					'/operation': [
+						'getKpis',
+						'getTopVideos',
+						'getTopAccounts',
+						'getTopCreators',
+						'getInteractionMetrics',
+						'exportDailyGains',
+					],
+				},
 			},
+			routing: { send: { type: 'query', property: 'viewMode' } },
+		},
 		],
 	},
 ];

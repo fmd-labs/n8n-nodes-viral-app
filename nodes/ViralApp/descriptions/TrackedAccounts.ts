@@ -11,51 +11,63 @@ export const trackedAccountsOperations: INodeProperties[] = [
 				resource: ['trackedAccounts'],
 			},
 		},
-		options: [
-			{
-				name: 'Add',
-				value: 'add',
-				description: 'Add new tracked accounts',
-				action: 'Add tracked accounts',
-			},
-			{
-				name: 'Get Count',
-				value: 'getCount',
-				description: 'Get count of tracked accounts',
-				action: 'Get tracked accounts count',
-			},
-			{
-				name: 'Get Many',
-				value: 'getAll',
-				description: 'List many tracked accounts',
-				action: 'List all tracked accounts',
-			},
-			{
-				name: 'Refresh',
-				value: 'refresh',
-				description: 'Refresh tracked accounts data',
-				action: 'Refresh tracked accounts',
-			},
-			{
-				name: 'Update Hashtags',
-				value: 'updateHashtags',
-				description: 'Update hashtag filters for an account',
-				action: 'Update hashtags for tracked account',
-			},
-			{
-				name: 'Update Max Videos',
-				value: 'updateMaxVideos',
-				description: 'Update maximum videos to track for an account',
-				action: 'Update max videos for tracked account',
-			},
-			{
-				name: 'Update Project Hashtags',
-				value: 'updateProjectHashtags',
-				description: 'Update project-specific hashtag filters',
-				action: 'Update project hashtags for tracked account',
-			},
-		],
-		default: 'getAll',
+	options: [
+		{
+			name: 'Add',
+			value: 'add',
+			description: 'Add new tracked accounts',
+			action: 'Add tracked accounts',
+		},
+		{
+			name: 'Get Count',
+			value: 'getCount',
+			description: 'Get count of tracked accounts',
+			action: 'Get tracked accounts count',
+		},
+		{
+			name: 'Get Many',
+			value: 'getAll',
+			description: 'List many tracked accounts',
+			action: 'List all tracked accounts',
+		},
+		{
+			name: 'Refresh',
+			value: 'refresh',
+			description: 'Refresh tracked accounts data',
+			action: 'Refresh tracked accounts',
+		},
+		{
+			name: 'Set Competitor Flag',
+			value: 'setCompetitor',
+			description: 'Mark or unmark a tracked account as a competitor',
+			action: 'Set competitor flag for tracked account',
+		},
+		{
+			name: 'Set Competitor Flag (Bulk)',
+			value: 'setCompetitors',
+			description: 'Mark or unmark multiple tracked accounts as competitors',
+			action: 'Set competitor flags in bulk',
+		},
+		{
+			name: 'Update Hashtags',
+			value: 'updateHashtags',
+			description: 'Update hashtag filters for an account',
+			action: 'Update hashtags for tracked account',
+		},
+		{
+			name: 'Update Max Videos',
+			value: 'updateMaxVideos',
+			description: 'Update maximum videos to track for an account',
+			action: 'Update max videos for tracked account',
+		},
+		{
+			name: 'Update Project Hashtags',
+			value: 'updateProjectHashtags',
+			description: 'Update project-specific hashtag filters',
+			action: 'Update project hashtags for tracked account',
+		},
+	],
+	default: 'getAll',
 	},
 ];
 
@@ -250,6 +262,24 @@ export const trackedAccountsFields: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				displayName: 'View Mode',
+				name: 'viewMode',
+				type: 'options',
+				options: [
+					{ name: 'All', value: 'all' },
+					{ name: 'Competitors', value: 'competitors' },
+					{ name: 'Internal Accounts', value: 'internal' },
+				],
+				default: 'internal',
+				description: 'Whether to show your own accounts, competitors, or both',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'viewMode',
+					},
+				},
+			},
 		],
 	},
 	// ----------------------------------------
@@ -341,11 +371,18 @@ export const trackedAccountsFields: INodeProperties[] = [
 							{
 								name: '2000',
 								value: 2000,
-							},
-						],
-						default: 100,
-						description: 'Maximum number of videos to track',
 					},
+				],
+				default: 100,
+				description: 'Maximum number of videos to track',
+			},
+			{
+				displayName: 'Is Competitor',
+				name: 'isCompetitor',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to mark all provided accounts as competitors',
+			},
 				],
 			},
 		],
@@ -602,6 +639,128 @@ export const trackedAccountsFields: INodeProperties[] = [
 					},
 				],
 			},
+		],
+	},
+
+	// ----------------------------------------
+	//        trackedAccounts: setCompetitor
+	// ----------------------------------------
+	{
+		displayName: 'Account Name or ID',
+		name: 'accountId',
+		type: 'resourceLocator',
+		default: {
+			mode: 'list',
+			value: '',
+		},
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['trackedAccounts'],
+				operation: ['setCompetitor'],
+			},
+		},
+		modes: [
+			{
+				displayName: 'List',
+				name: 'list',
+				type: 'list',
+				typeOptions: {
+					searchListMethod: 'accountSearch',
+				},
+			},
+			{
+				displayName: 'ID',
+				name: 'id',
+				type: 'string',
+			},
+		],
+		description:
+			'Select the tracked account. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: 'Is Competitor',
+		name: 'isCompetitor',
+		type: 'boolean',
+		default: true,
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['trackedAccounts'],
+				operation: ['setCompetitor'],
+			},
+		},
+		description: 'Whether the tracked account is marked as a competitor',
+	},
+
+	// ----------------------------------------
+	//        trackedAccounts: setCompetitors (bulk)
+	// ----------------------------------------
+	{
+		displayName: 'Bulk Competitor Update',
+		name: 'bulkCompetitors',
+		type: 'collection',
+		default: {},
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['trackedAccounts'],
+				operation: ['setCompetitors'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Accounts',
+				name: 'accounts',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				default: {},
+				description: 'Accounts to update. Leave empty to apply to all tracked accounts.',
+				options: [
+					{
+						displayName: 'Account',
+						name: 'account',
+						values: [
+							{
+								displayName: 'Account Name or ID',
+								name: 'accountId',
+								type: 'resourceLocator',
+								default: {
+									mode: 'list',
+									value: '',
+								},
+								modes: [
+									{
+										displayName: 'List',
+										name: 'list',
+										type: 'list',
+										typeOptions: {
+											searchListMethod: 'accountSearch',
+										},
+									},
+									{
+										displayName: 'ID',
+										name: 'id',
+										type: 'string',
+									},
+								],
+								description:
+									'Select the tracked account. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'Is Competitor',
+				name: 'isCompetitor',
+				type: 'boolean',
+				default: true,
+				required: true,
+		description: 'Whether the provided accounts are marked as competitors',
+	},
 		],
 	},
 ];

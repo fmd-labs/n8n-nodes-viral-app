@@ -312,6 +312,24 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				displayName: 'View Mode',
+				name: 'viewMode',
+				type: 'options',
+				options: [
+					{ name: 'All', value: 'all' },
+					{ name: 'Competitors', value: 'competitors' },
+					{ name: 'Internal Accounts', value: 'internal' },
+				],
+				default: 'internal',
+				description: 'Choose whether to include competitors in results',
+				routing: {
+					send: {
+						type: 'query',
+						property: 'viewMode',
+					},
+				},
+			},
 		],
 	},
 	// ----------------------------------------
