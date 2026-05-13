@@ -85,7 +85,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org/'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -95,8 +94,9 @@ jobs:
         # Lint and build run automatically as part of the release process.
         #
         # Option A (OIDC): leave NPM_TOKEN unset; npm uses the OIDC exchange instead.
-        # Option B (token): set NPM_TOKEN in repo secrets — setup-node exposes it
-        #   to npm through NODE_AUTH_TOKEN.
-        run: pnpm run release
+        # Option B (token): set NPM_TOKEN in repo secrets.
+        run: |
+          [ -n "$NPM_TOKEN" ] && npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          pnpm run release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
