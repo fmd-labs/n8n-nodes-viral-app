@@ -77,12 +77,6 @@ export const integrationsFields: INodeProperties[] = [
 				default: '',
 				description: 'Filter by integration provider',
 				placeholder: 'e.g. zapier',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'provider',
-					},
-				},
 			},
 			{
 				displayName: 'Search',
@@ -91,12 +85,6 @@ export const integrationsFields: INodeProperties[] = [
 				default: '',
 				description: 'Search apps by name or description',
 				placeholder: 'e.g. analytics',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Column',
@@ -122,12 +110,6 @@ export const integrationsFields: INodeProperties[] = [
 				],
 				default: 'title',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -144,12 +126,6 @@ export const integrationsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 		],
 	},

@@ -89,12 +89,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 				default: '',
 				description: 'Search videos by ID or title',
 				placeholder: 'e.g. video title or ID',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
 			},
 			{
 				displayName: 'Platforms',
@@ -116,12 +110,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Column',
@@ -159,12 +147,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 				],
 				default: 'platform',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -181,12 +163,6 @@ export const trackedIndividualVideosFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 		],
 	},

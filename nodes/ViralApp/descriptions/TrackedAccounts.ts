@@ -126,12 +126,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -207,12 +201,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: 'username',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -230,12 +218,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: 'desc',
 				description: 'Direction to sort the results',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 			{
 				displayName: 'Username',
@@ -243,12 +225,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Filter by account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'username',
-					},
-				},
 			},
 		],
 	},
@@ -506,12 +482,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 		default: 100,
 		required: true,
 		description: 'Maximum number of videos to track',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'newMaxVideos',
-			},
-		},
 	},
 
 	// ----------------------------------------

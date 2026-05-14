@@ -202,12 +202,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Account username on the platform',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'accountUsername',
-					},
-				},
 			},
 			{
 				displayName: 'Content Types',
@@ -225,12 +219,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by content types',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'contentTypes',
-					},
-				},
 			},
 			{
 				displayName: 'Date Range From',
@@ -238,13 +226,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'dateTime',
 				default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
 				description: 'Start date (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[from]',
-						value: '={{$value.split("T")[0]}}',
-					},
-				},
 			},
 			{
 				displayName: 'Date Range To',
@@ -252,13 +233,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'dateTime',
 				default: '={{$today.toFormat("yyyy-MM-dd")}}',
 				description: 'End date (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[to]',
-						value: '={{$value.split("T")[0]}}',
-					},
-				},
 			},
 			{
 				displayName: 'Platforms',
@@ -280,12 +254,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -350,12 +318,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: 'publishedAt',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -372,12 +334,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 		],
 	},
@@ -481,12 +437,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Search',
@@ -494,12 +444,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Search by video ID or account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Column',
@@ -521,12 +465,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: 'publishedAt',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -544,12 +482,6 @@ export const videoAnalyticsFields: INodeProperties[] = [
 				],
 				default: 'desc',
 				description: 'Direction to sort the results',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 		],
 	},

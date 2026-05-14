@@ -143,7 +143,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 						],
 					},
 				},
-				routing: { send: { type: 'query', property: 'accounts' } },
 			},
 			{
 				displayName: 'Content Types',
@@ -166,12 +165,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 						'/operation': ['getTopVideos', 'getTopAccounts', 'getInteractionMetrics', 'getKpis'],
 					},
 				},
-				routing: {
-					send: {
-						type: 'query',
-						property: 'contentTypes',
-					},
-				},
 			},
 			{
 				displayName: 'Limit',
@@ -187,12 +180,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 				default: 50,
 				description: 'Max number of results to return',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'limit',
-					},
-				},
 			},
 			// Metric for Get Top Videos
 			{
@@ -258,12 +245,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				default: 'viewCount',
 				description:
 					'Metric to sort videos by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'metric',
-					},
-				},
 			},
 			// Metric for Get Top Accounts
 			{
@@ -344,12 +325,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				default: 'viewCount',
 				description:
 					'Metric to sort accounts by. Lifetime metrics show total counts, period metrics show gains during the selected date range.',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'metric',
-					},
-				},
 			},
 			{
 				displayName: 'Only Published',
@@ -362,12 +337,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				},
 				default: false,
 				description: 'Whether to include only published content',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'onlyPublished',
-					},
-				},
 			},
 			{
 				displayName: 'Platforms',
@@ -389,12 +358,6 @@ export const generalAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Project Names or IDs',

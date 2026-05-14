@@ -10,7 +10,6 @@ import {
 } from 'n8n-workflow';
 
 import { viralAppApiRequest } from './GenericFunctions';
-import { resolveBaseUrl } from './baseUrl';
 import { operationHandlers } from './operations';
 
 import { trackedAccountsOperations, trackedAccountsFields } from './descriptions/TrackedAccounts';
@@ -50,10 +49,6 @@ export class ViralApp implements INodeType {
 				required: true,
 			},
 		],
-		requestDefaults: {
-			baseURL: resolveBaseUrl(),
-			json: true,
-		},
 		hints: [
 			{
 				message:
