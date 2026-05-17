@@ -107,12 +107,6 @@ export const projectsFields: INodeProperties[] = [
 				default: '',
 				description: 'Filter projects by name',
 				placeholder: 'e.g. Marketing Campaign',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
 			},
 		],
 	},
@@ -226,12 +220,6 @@ export const projectsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Project name',
-				routing: {
-					send: {
-						type: 'body',
-						property: 'name',
-					},
-				},
 			},
 			{
 				displayName: 'Description',

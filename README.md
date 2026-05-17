@@ -12,6 +12,8 @@ ViralApp is a comprehensive video analytics platform that provides insights and 
 - [Credentials](#credentials)  
 - [Compatibility](#compatibility)  
 - [Resources](#resources)  
+- [Development](#development)
+- [Publishing](#publishing)
 - [Version History](#version-history)
 
 ## Installation
@@ -125,15 +127,31 @@ pnpm install
 # Build the node
 pnpm build
 
-# Run in development mode
+# Run n8n with the node loaded
 pnpm dev
+
+# Rebuild TypeScript on changes without starting n8n
+pnpm build:watch
 
 # Run linter
 pnpm lint
 
 # Run linter and auto-fix
-pnpm lintfix
+pnpm lint:fix
 ```
+
+## Publishing
+
+Verified n8n community nodes must be published from GitHub Actions with npm provenance.
+
+1. Configure npm Trusted Publishing for `.github/workflows/publish.yml`, or add an `NPM_TOKEN` repository secret.
+2. Run the release flow locally:
+
+```bash
+pnpm release
+```
+
+The release command lints, builds, bumps the version, creates the Git tag, and pushes it. The tag triggers GitHub Actions, which publishes the package to npm with provenance. Direct local `npm publish` is blocked by `prepublishOnly`.
 
 ## License
 

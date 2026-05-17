@@ -11,63 +11,63 @@ export const trackedAccountsOperations: INodeProperties[] = [
 				resource: ['trackedAccounts'],
 			},
 		},
-	options: [
-		{
-			name: 'Add',
-			value: 'add',
-			description: 'Add new tracked accounts',
-			action: 'Add tracked accounts',
-		},
-		{
-			name: 'Get Count',
-			value: 'getCount',
-			description: 'Get count of tracked accounts',
-			action: 'Get tracked accounts count',
-		},
-		{
-			name: 'Get Many',
-			value: 'getAll',
-			description: 'List many tracked accounts',
-			action: 'List all tracked accounts',
-		},
-		{
-			name: 'Refresh',
-			value: 'refresh',
-			description: 'Refresh tracked accounts data',
-			action: 'Refresh tracked accounts',
-		},
-		{
-			name: 'Set Competitor Flag',
-			value: 'setCompetitor',
-			description: 'Mark or unmark a tracked account as a competitor',
-			action: 'Set competitor flag for tracked account',
-		},
-		{
-			name: 'Set Competitor Flag (Bulk)',
-			value: 'setCompetitors',
-			description: 'Mark or unmark multiple tracked accounts as competitors',
-			action: 'Set competitor flags in bulk',
-		},
-		{
-			name: 'Update Hashtags',
-			value: 'updateHashtags',
-			description: 'Update hashtag filters for an account',
-			action: 'Update hashtags for tracked account',
-		},
-		{
-			name: 'Update Max Videos',
-			value: 'updateMaxVideos',
-			description: 'Update maximum videos to track for an account',
-			action: 'Update max videos for tracked account',
-		},
-		{
-			name: 'Update Project Hashtags',
-			value: 'updateProjectHashtags',
-			description: 'Update project-specific hashtag filters',
-			action: 'Update project hashtags for tracked account',
-		},
-	],
-	default: 'getAll',
+		options: [
+			{
+				name: 'Add',
+				value: 'add',
+				description: 'Add new tracked accounts',
+				action: 'Add tracked accounts',
+			},
+			{
+				name: 'Get Count',
+				value: 'getCount',
+				description: 'Get count of tracked accounts',
+				action: 'Get tracked accounts count',
+			},
+			{
+				name: 'Get Many',
+				value: 'getAll',
+				description: 'List many tracked accounts',
+				action: 'List all tracked accounts',
+			},
+			{
+				name: 'Refresh',
+				value: 'refresh',
+				description: 'Refresh tracked accounts data',
+				action: 'Refresh tracked accounts',
+			},
+			{
+				name: 'Set Competitor Flag',
+				value: 'setCompetitor',
+				description: 'Mark or unmark a tracked account as a competitor',
+				action: 'Set competitor flag for tracked account',
+			},
+			{
+				name: 'Set Competitor Flag (Bulk)',
+				value: 'setCompetitors',
+				description: 'Mark or unmark multiple tracked accounts as competitors',
+				action: 'Set competitor flags in bulk',
+			},
+			{
+				name: 'Update Hashtags',
+				value: 'updateHashtags',
+				description: 'Update hashtag filters for an account',
+				action: 'Update hashtags for tracked account',
+			},
+			{
+				name: 'Update Max Videos',
+				value: 'updateMaxVideos',
+				description: 'Update maximum videos to track for an account',
+				action: 'Update max videos for tracked account',
+			},
+			{
+				name: 'Update Project Hashtags',
+				value: 'updateProjectHashtags',
+				description: 'Update project-specific hashtag filters',
+				action: 'Update project hashtags for tracked account',
+			},
+		],
+		default: 'getAll',
 	},
 ];
 
@@ -138,12 +138,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -219,12 +213,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: 'username',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -242,12 +230,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: 'desc',
 				description: 'Direction to sort the results',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 			{
 				displayName: 'Username',
@@ -255,12 +237,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Filter by account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'username',
-					},
-				},
 			},
 			{
 				displayName: 'View Mode',
@@ -273,12 +249,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 				],
 				default: 'internal',
 				description: 'Whether to show your own accounts, competitors, or both',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'viewMode',
-					},
-				},
 			},
 		],
 	},
@@ -371,18 +341,18 @@ export const trackedAccountsFields: INodeProperties[] = [
 							{
 								name: '2000',
 								value: 2000,
+							},
+						],
+						default: 100,
+						description: 'Maximum number of videos to track',
 					},
-				],
-				default: 100,
-				description: 'Maximum number of videos to track',
-			},
-			{
-				displayName: 'Is Competitor',
-				name: 'isCompetitor',
-				type: 'boolean',
-				default: false,
-				description: 'Whether to mark all provided accounts as competitors',
-			},
+					{
+						displayName: 'Is Competitor',
+						name: 'isCompetitor',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to mark all provided accounts as competitors',
+					},
 				],
 			},
 		],
@@ -543,12 +513,6 @@ export const trackedAccountsFields: INodeProperties[] = [
 		default: 100,
 		required: true,
 		description: 'Maximum number of videos to track',
-		routing: {
-			send: {
-				type: 'body',
-				property: 'newMaxVideos',
-			},
-		},
 	},
 
 	// ----------------------------------------
@@ -759,8 +723,8 @@ export const trackedAccountsFields: INodeProperties[] = [
 				type: 'boolean',
 				default: true,
 				required: true,
-		description: 'Whether the provided accounts are marked as competitors',
-	},
+				description: 'Whether the provided accounts are marked as competitors',
+			},
 		],
 	},
 ];

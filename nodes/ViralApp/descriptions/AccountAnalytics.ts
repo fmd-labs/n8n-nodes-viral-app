@@ -118,12 +118,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by content types',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'contentTypes',
-					},
-				},
 			},
 			{
 				displayName: 'Date Range From',
@@ -131,13 +125,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				type: 'dateTime',
 				default: '={{$today.minus({days: 14}).toFormat("yyyy-MM-dd")}}',
 				description: 'Start date for analytics data (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[from]',
-						value: '={{$value.split("T")[0]}}',
-					},
-				},
 			},
 			{
 				displayName: 'Date Range To',
@@ -145,13 +132,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				type: 'dateTime',
 				default: '={{$today.toFormat("yyyy-MM-dd")}}',
 				description: 'End date for analytics data (YYYY-MM-DD)',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'dateRange[to]',
-						value: '={{$value.split("T")[0]}}',
-					},
-				},
 			},
 			{
 				displayName: 'Platforms',
@@ -173,12 +153,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				],
 				default: [],
 				description: 'Filter by social media platforms',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'platforms',
-					},
-				},
 			},
 			{
 				displayName: 'Project Names or IDs',
@@ -212,12 +186,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'Search by account username',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'search',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Column',
@@ -283,12 +251,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				],
 				default: 'username',
 				description: 'Column to sort by',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortCol',
-					},
-				},
 			},
 			{
 				displayName: 'Sort Direction',
@@ -305,12 +267,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 					},
 				],
 				default: 'desc',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'sortDir',
-					},
-				},
 			},
 			{
 				displayName: 'View Mode',
@@ -323,12 +279,6 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				],
 				default: 'internal',
 				description: 'Choose whether to include competitors in results',
-				routing: {
-					send: {
-						type: 'query',
-						property: 'viewMode',
-					},
-				},
 			},
 		],
 	},
@@ -449,12 +399,5 @@ export const accountAnalyticsFields: INodeProperties[] = [
 				description: 'Search by account username',
 			},
 		],
-		routing: {
-			send: {
-				type: 'body',
-				property:
-					'={{Object.assign({}, $value, $value.dateRange?.range ? {dateRange: {from: $value.dateRange.range[0].from.split("T")[0], to: $value.dateRange.range[0].to.split("T")[0]}} : {})}}',
-			},
-		},
 	},
 ];
